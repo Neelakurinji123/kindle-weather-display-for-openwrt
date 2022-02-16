@@ -1,0 +1,21 @@
+{
+    "station": {
+        "city": "Tokorozawa",
+        "timezone": "Asia/Tokyo",
+        "encoding": "utf-8",
+        "locale": "ja_JP.UTF-8",
+        "font": "Droid Sans",
+        "sunrise_and_sunset": "False",
+        "darkmode": "False",
+        "service": "onecall",
+        "api_key": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "lat": "35.8034315",
+        "lon": "139.4275599",
+        "units": "metric",
+        "lang": "ja",
+        "exclude": "minutely",
+        "alerts": "True",
+        "cloudconvert": "True",
+        "converter": "convert"
+    }
+}

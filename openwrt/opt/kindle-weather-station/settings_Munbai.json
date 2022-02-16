@@ -1,0 +1,21 @@
+{
+    "station": {
+        "city": "Munbai",
+        "timezone": "Asia/Kolkata",
+        "encoding": "utf-8",
+        "locale": "hi_IN.UTF-8",
+        "font": "Droid Sans",
+        "sunrise_and_sunset": "False",
+        "darkmode": "False",
+        "service": "onecall",
+        "api_key": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "lat": "19.0821978",
+        "lon": "72.7411",
+        "units": "metric",
+        "lang": "hi",
+        "exclude": "minutely",
+        "alerts": "True",
+        "cloudconvert": "True",
+        "converter": "convert"
+    }
+}

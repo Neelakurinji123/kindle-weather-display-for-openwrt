@@ -1,0 +1,21 @@
+{
+    "station": {
+        "city": "Tel Aviv",
+        "timezone": "Asia/Jerusalem",
+        "encoding": "utf-8",
+        "locale": "he_IL.UTF-8",
+        "font": "Droid Sans",
+        "sunrise_and_sunset": "False",
+        "darkmode": "False",
+        "service": "onecall",
+        "api_key": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "lat": "32.0879122",
+        "lon": "34.7272058",
+        "units": "metric",
+        "lang": "he",
+        "exclude": "minutely",
+        "alerts": "True",
+        "cloudconvert": "True",
+        "converter": "convert"
+    }
+}

@@ -1,0 +1,10 @@
+*/15 * * * * /usr/sbin/checkpmond
+*/15 * * * * /usr/sbin/tinyrot
+*/60 * * * * /usr/sbin/loginfo tmpfs
+*/60 * * * * /usr/sbin/loginfo localVars
+*/60 * * * * /usr/sbin/loginfo memusedump
+*/15 * * * * /usr/sbin/loginfo powerdcheck
+#0,10,15,20,25,30,40,45,50,55 * * * * sh /mnt/us/timelit/timelit.sh
+#0 * * * * sh -c "/mnt/us/kindle-weather/update_time.sh"
+2 * * * * sh -c "/mnt/us/kindle-weather/weather-script.sh"
+0 * * * * sh -c "/usr/bin/ntpdate 0.jp.pool.ntp.org"

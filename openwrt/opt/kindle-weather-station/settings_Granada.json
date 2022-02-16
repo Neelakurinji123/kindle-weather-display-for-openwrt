@@ -1,0 +1,21 @@
+{
+    "station": {
+        "city": "Granada",
+        "timezone": "Europe/Madrid",
+        "encoding": "iso-8859-1",
+        "locale": "en_US.UTF-8",
+        "font": "Droid Sans",
+        "sunrise_and_sunset": "False",
+        "darkmode": "False",
+        "service": "onecall",
+        "api_key": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "lat": "37.1809411",
+        "lon": "-3.6262912",
+        "units": "metric",
+        "lang": "es",
+        "exclude": "minutely",
+        "alerts": "True",
+        "cloudconvert": "True",
+        "converter": "convert"
+    }
+}

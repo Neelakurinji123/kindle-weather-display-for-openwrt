@@ -1,0 +1,21 @@
+{
+    "station": {
+        "city": "Saint-Petersburg",
+        "timezone": "Europe/Moscow",
+        "encoding": "utf-8",
+        "locale": "ru_RU.UTF-8",
+        "font": "Droid Sans",
+        "sunrise_and_sunset": "False",
+        "darkmode": "False",
+        "service": "onecall",
+        "api_key": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "lat": "59.9392259",
+        "lon": "29.5342917",
+        "units": "metric",
+        "lang": "ru",
+        "exclude": "minutely",
+        "alerts": "True",
+        "cloudconvert": "True",
+        "converter": "convert"
+    }
+}

@@ -1,0 +1,21 @@
+{
+    "station": {
+        "city": "Melbourne",
+        "timezone": "Australia/Melbourne",
+        "encoding": "iso-8859-1",
+        "locale": "en_AU.UTF-8",
+        "font": "Droid Sans",
+        "sunrise_and_sunset": "False",
+        "darkmode": "False",
+        "service": "onecall",
+        "api_key": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "lat": "-37.8136",
+        "lon": "144.9631",
+        "units": "metric",
+        "lang": "en",
+        "exclude": "minutely",
+        "alerts": "True",
+        "cloudconvert": "True",
+        "converter": "convert"
+    }
+}
