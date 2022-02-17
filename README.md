@@ -1,5 +1,14 @@
 # Kindle Weather Display for OpenWrt
-This program is for a weather display on old Kindle 3 based on the original work by Kindle-weather-station
+This program is for a weather display on old Kindle 3 based on the original work by [Kindle-weather-station](https://gitlab.com/iero/Kindle-weather-station)
+
+## Features
+- Weather information is from [OpenWeatherMap API](https://openweathermap.org/)
+- Converting SVG to PNG is [CloudConvert API](https://cloudconvert.com/)
+- A weather display is current weather, 3 hour forecast and 3 day forecast
+- Almost any locales, languages and units are enabled
+
+## Screenshot
+<img src="/sample_screenshots/KindleStation.png" width="300" alt="Kindle 3 Screenshot" />
 
 ## Requirement
 - Minimum 256M/100M OpenWrt router
