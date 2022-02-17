@@ -16,7 +16,8 @@ This program is for a weather display on old Kindle 3 based on the original work
 - LAN port x1
 - API key of OpenWeatherMap
 - One Call API subscription
-- cAPI key of loudconvert
+- API key of CloudConvert
+- Jailbroken Kindle 3
 
 ## OpenWrt setup
 
