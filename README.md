@@ -4,7 +4,7 @@ This program is for a weather display on old Kindle 3 based on the original work
 ## Features
 - Weather data is from [OpenWeatherMap API](https://openweathermap.org/)
 - Converting SVG to PNG is [CloudConvert API](https://cloudconvert.com/)
-- Weather information is current weather, 3 hour forecast and 3 day forecast
+- The weather information is current weather, 3 hour forecast and 3 day forecast
 - Almost any locales, languages and units are enabled
 
 ## Screenshot
