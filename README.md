@@ -14,9 +14,9 @@ This program is for a weather display on old Kindle 3 based on the original work
 - Minimum 256M/100M OpenWrt router
 - USB port x1
 - LAN port x1
-- API key of OpenWeatherMap
+- API key for OpenWeatherMap
 - One Call API subscription
-- API key of CloudConvert
+- API key for CloudConvert
 - Jailbroken Kindle 3
 
 ## OpenWrt setup
@@ -157,7 +157,7 @@ Copy kindle-weather-display-for-openwrt to OpenWrt
 # cd /opt/kindle-weather-station
 ```
 
-Edit keys of OpenWeatherMap and cloudconvert in settings.json and cloudconvert.json
+Edit API keys for OpenWeatherMap and cloudconvert in settings.json and cloudconvert.json
 
 Edit crontab and restart cron
 ```
