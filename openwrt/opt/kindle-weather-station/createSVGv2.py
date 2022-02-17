@@ -27,6 +27,7 @@ from datetime import datetime, timedelta, date
 from pytz import timezone
 import pytz
 import locale
+import shutil
 from decimal import Decimal, ROUND_HALF_EVEN, ROUND_HALF_UP
 from subprocess import Popen
 from OpenWeatherMapAPIv2 import OpenWeatherMap
@@ -36,6 +37,7 @@ svgfile = "/tmp/KindleStation.svg"
 pngfile = "/tmp/KindleStation.png"
 pngtmpfile = "/tmp/.KindleStation.png"
 flatten_pngfile = "/tmp/KindleStation_flatten.png"
+error_image = "./img/error_service_unavailable.png"
 i18nfile = "i18n.json"
 coverter = 'convert'
 
@@ -673,7 +675,13 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         settings = sys.argv[1]
 
-    p = OpenWeatherMap(settings)
+    try:
+        p = OpenWeatherMap(settings)
+    except Exception as e:
+        shutil.copyfile(error_image, flatten_pngfile)
+        print(e)
+        exit(1)
+
     darkmode = p.darkmode
     curt_weather = p.current_weather()
     alerts_mode = p.alerts
