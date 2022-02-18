@@ -123,20 +123,25 @@ def s_padding(x):
     elif x <= -10 : return 0
 
 
-def text_split(start, length, text):
-    a = text.split()
-    b1 = start
+def text_split(length, text, start_text="" , match=""):
+    text_list = text.split()
+    b1 = start_text
     s = list()
-    i = int(0)
     n = int(0)
-    for v in a:
+    for v in text_list:
         n += 1
         b2 = b1
         b1 += v + " "
-        if len(a) == n:
+        if len(text_list) == n:
             s += [b1 + "\n"]
+        elif re.match(r'{}'.format(match), v) and not match == '':
+            s += [b2 + "\n"]
+            b1 = v + " "
+        elif re.match(r'^\*$', v) and not match == '':
+            s += [b2 + "\n"]
+            b1 = v + " "
         elif len(b1) < length:
-            v1 = v + " "
+            continue
         elif len(b1) >= length:
             s += [b2 + "\n"]
             b1 = v + " "
@@ -186,46 +191,37 @@ def add_header(p, t_now, tz):
 def add_alerts(p, base_y, max_y):
     alerts = p.weather_alerts()
     s = str()
-    c = text_split(start="ALERT: ", length=35, text=alerts[0]['event'])
+    c = text_split(length=35, text=alerts[0]['event'], start_text="ALERT: ")
 
     for v in c:
         s1 = SVGtext2("start", "bold", "30px", "20", base_y, str(v))
         s += s1.code()
         base_y += 40
 
-    s2 = SVGtext("start", "20px", "25", base_y, "Description:")
+    s2 = SVGtext("start", "20px", "30", base_y, "Description:")
     s += s2.code()
     base_y += 30
 
-    c1 = alerts[0]['description'].split('\n')
-    _x = 30
-    #length = 50
-    length = 57
-    for v1 in c1:
-        flag = True
-        c2 = list()
-        t1_list = text_split(start="", length=length, text=v1)
-        t1_list = [re.sub(r' \n$', '', text) for text in t1_list]
-        t1 = ' '.join(str(text) for text in t1_list)
-        t1_list = text_split(start="", length=length, text=t1)
-        c2 += t1_list
-        #c2 += [t1]
-        c3 = list()
-        for v2 in c2:
-            if base_y > max_y -35:
-                v2 = v2[:-2]
-                v2 += "..."
-                s2 = SVGtext("start", "18px", _x, base_y, str(v2))
-                s += s2.code()
-                flag = False
-                break
-            else:
-                s2 = SVGtext("start", "18px", _x, base_y, str(v2))
-                s += s2.code()
-
-            base_y += 30
-        if flag == False:
+    v1 = alerts[0]['description']
+    v1 = re.sub(r'\n', ' ', v1, flags=re.MULTILINE)
+    base_x = 40
+    length = 60
+    #length = 57
+    flag = True
+    v1_list = text_split(length=length, text=v1, match='\*')
+    for v2 in v1_list:
+        if base_y > max_y -35:
+            v2 = v2[:-2]
+            v2 += "..."
+            s2 = SVGtext("start", "18px", base_x, base_y, str(v2))
+            s += s2.code()
+            flag = False
             break
+        else:
+            s2 = SVGtext("start", "18px", base_x, base_y, str(v2))
+            s += s2.code()
+
+        base_y += 30
 
     return s
 
@@ -255,7 +251,7 @@ def add_curt_weather_disc(p, base_x, base_y, disc_offset=0, wordwrap=0):
 
     # description
     if wordwrap != 0:
-        disc = text_split(start="", length=wordwrap, text=curt_weather[3])
+        disc = text_split(length=wordwrap, text=curt_weather[3])
     else:
         disc = [curt_weather[3]]
 
