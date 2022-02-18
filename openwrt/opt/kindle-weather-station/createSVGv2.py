@@ -326,7 +326,7 @@ def add_curt_weather_alerts(p, base_x, base_y):
     return s
 
 
-def text_temp_format(base_x, base_y, text, unit):
+def text_temp_unit(base_x, base_y, text, unit):
     s1 = SVGtext("end", "35px", (base_x), (base_y), text)
     s2 = SVGcircle((base_x + 5), (base_y - 25), 4, "black", 2, "none")
     s3 = SVGtext("start", "25px", (base_x + 10), (base_y  - 10), unit)
@@ -371,7 +371,7 @@ def add_hourly_forecast(p, tz, base_x, base_y, pitch):
 
         s1 = SVGtext("start", "25px", (base_x - 130), (base_y - 5), hours[i])
         #s1 = SVGtext("end", "25px", (base_x + 80), (base_y - 5), hours[i])
-        s2_text = text_temp_format(base_x=(base_x - 100), base_y=(base_y - 74), text=round(hourly_forecast[5]), unit=p.unit['temp'])
+        s2_text = text_temp_unit(base_x=(base_x - 100), base_y=(base_y - 74), text=round(hourly_forecast[5]), unit=p.unit['temp'])
         s3_text = add_hourly_forecast_precipitation(hourly_forecast=hourly_forecast, base_x=base_x, base_y=base_y)
         s += s1.code() + s2_text + s3_text
 
@@ -400,8 +400,8 @@ def add_daily_forecast(p, base_x, base_y, pitch):
         w = d["full_weekday"][w] if not d == dict() else w
 
         s1 = SVGtext("end", "35px", (base_x + 185), (base_y + n), w)
-        s2_text = text_temp_format(base_x=tMin, base_y=(base_y + n), text=int(tLow), unit=p.unit['temp'])
-        s3_text = text_temp_format(base_x=int(tMax - s_padding(tHigh)), base_y=(base_y + n), text=int(tHigh), unit=p.unit['temp'])
+        s2_text = text_temp_unit(base_x=tMin, base_y=(base_y + n), text=int(tLow), unit=p.unit['temp'])
+        s3_text = text_temp_unit(base_x=int(tMax - s_padding(tHigh)), base_y=(base_y + n), text=int(tHigh), unit=p.unit['temp'])
         s4 = SVGline(int(tMin + 40), int(tMax - 65), (base_y + n - 10), (base_y + n - 10), "fill:none;stroke:black;stroke-linecap:round;stroke-width:10px;")
 
         s += s1.code() + s2_text + s3_text + s4.code()
