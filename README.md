@@ -147,7 +147,7 @@ system.@system[0].zonename='<Zone Name>'
 system.@system[0].timezone='<Time Zone>'
 ```
 
-### Kindle Weather Display setup
+### Kindle Weather Display server setup
 Copy kindle-weather-display-for-openwrt to OpenWrt
 ```
 # opkg install unzip
