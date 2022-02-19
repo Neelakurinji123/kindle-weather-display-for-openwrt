@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
-
-#import extras.WeatherIcons as wi
-
+#
 # Weather icons by Adam Whitcroft from the Noun Project
+#
 
 #def getDrizzle():
 #   # 45%, x=0px, y=-5px
