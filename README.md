@@ -35,7 +35,7 @@ This program is for a weather display on old Kindle 3 based on the original work
 - IP address is `192.168.2.1/24`
 - Netwok > Interfaces - Firewall settings: Add `usb` zone
 - Input, Output and Forward set `reject`
-- Add foreward `usb` zone` to `lan`
+- Add foreward `usb` zone to `lan`
 - Network > Firewall - Traffic Rules: `22/tcp`, `123/udp`, `53/udp` and `icmp` set open both incoming and outgoing
 - Setup `123/udp`, `53/udp` and `icmp` for snat
 
