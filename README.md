@@ -10,7 +10,7 @@ This program is for a weather display on old Kindle 3 based on the original work
 ## Screenshot
 <img src="/sample_screenshots/KindleStation.png" height="400" alt="Kindle 3 Screenshot" /><img src="https://user-images.githubusercontent.com/70471447/154597426-2da949ff-90e9-4416-af16-47f2413bda54.jpg" height="400">
 
-## Requirement
+## Requirements
 - Minimum 256M/100M OpenWrt router
 - USB port x1
 - LAN port x1
