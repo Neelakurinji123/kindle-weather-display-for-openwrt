@@ -7,10 +7,10 @@ This program is for a weather display on old Kindle 3 based on the original work
 - The weather information is current weather, 3 hour forecast and 3 day forecast
 - Almost any locales, languages and units are enabled
 
-## Screenshot
+## Screenshots
 <img src="/sample_screenshots/KindleStation.png" height="400" alt="Kindle 3 Screenshot" /><img src="https://user-images.githubusercontent.com/70471447/154597426-2da949ff-90e9-4416-af16-47f2413bda54.jpg" height="400">
 
-## Requirement
+## Requirements
 - Minimum 256M/100M OpenWrt router
 - USB port x1
 - LAN port x1
@@ -35,7 +35,7 @@ This program is for a weather display on old Kindle 3 based on the original work
 - IP address is `192.168.2.1/24`
 - Netwok > Interfaces - Firewall settings: Add `usb` zone
 - Input, Output and Forward set `reject`
-- Add foreward `usb` zone` to `lan`
+- Add foreward `usb` zone to `lan`
 - Network > Firewall - Traffic Rules: `22/tcp`, `123/udp`, `53/udp` and `icmp` set open both incoming and outgoing
 - Setup `123/udp`, `53/udp` and `icmp` for snat
 
@@ -147,7 +147,7 @@ system.@system[0].zonename='<Zone Name>'
 system.@system[0].timezone='<Time Zone>'
 ```
 
-### Kindle Weather Display setup
+### Kindle Weather Display server setup
 Copy kindle-weather-display-for-openwrt to OpenWrt
 ```
 # opkg install unzip
