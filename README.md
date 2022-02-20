@@ -209,7 +209,7 @@ Edit crontab and restart cron
 # kill $(pidof crond)
 # /etc/init.d/cron start
 # pidof crond
-mntroot ro
+# mntroot ro
 ```
 `cron` starts to run to download `KindleStation_flatten.png` from OpenWrt server and synchronize the clock at hourly intervals
 
