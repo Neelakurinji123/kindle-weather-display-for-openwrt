@@ -249,4 +249,4 @@ Comment out cronjobs
 #2 * * * * sh -c "/mnt/us/kindle-weather/weather-script.sh"
 #0 * * * * sh -c "/usr/bin/ntpdate 0.jp.pool.ntp.org"
 ```
-Type `Shift`, `q` and `q` keys quickly and soon start rebooting
+Type `Shift`, `q` and `q` keys quickly. After this, Kindle start rebooting
