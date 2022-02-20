@@ -247,7 +247,7 @@ def add_curt_weather_disc(p, base_x, base_y, disc_offset=0, wordwrap=0):
     s_pres = SVGtext("end", "30px", (base_x + 150 + disc_offset),(base_y - 80), str(round(curt_weather[6])) + p.unit['pressure'])
 
     # Wind
-    s1_wind = SVGtext("end", "30px", (base_x + 150 + disc_offset),(base_y - 40), str(int(curt_weather[8])) + p.unit['wind_speed'])
+    s1_wind = SVGtext("end", "30px", (base_x + 150 + disc_offset),(base_y - 40), str(int(curt_weather[8])) + " " + p.unit['wind_speed'])
 
     # description
     if wordwrap != 0:
