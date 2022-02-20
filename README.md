@@ -183,8 +183,8 @@ Login to Kindle and copy the following files to Kindle:
 # ssh root@192.168.2.2
 # cd /tmp
 # unzip kindle-weather-display-for-openwrt.zip
-# mv kindle-weather-display-for-openwrt/kindle/kindle-weather /mnt/us
-# mv kindle-weather-display-for-openwrt/kindle/launchpad /mnt/us
+# mv kindle-weather-display-for-openwrt/kindle/kindle-weather /mnt/us/
+# mv kindle-weather-display-for-openwrt/kindle/launchpad/KindleWeather.ini /mnt/us/launchpad/
 # cd /mnt/us/kindle-weather
 # mv disable enable
 ```
