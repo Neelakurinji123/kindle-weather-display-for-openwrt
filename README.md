@@ -19,9 +19,9 @@ This program is for a weather display on old Kindle 3 based on the original work
 - API key for CloudConvert
 - Jailbroken Kindle 3
 
-## OpenWrt setup
+## Setting up OpenWrt
 
-### Python 3 installation
+### Installing Python 3
 ```
 # opkg install python3 python3-pytz python3-pip python3-requests imagemagickpip install --upgrade pip
 # pip install wheel
@@ -30,7 +30,12 @@ This program is for a weather display on old Kindle 3 based on the original work
 # pip install cloudconvert
 ```
 
-### Network interface `usb` and firewall zone `usb` setup
+### Installing USB network
+```
+# opkg install kmod-usb-net kmod-usb-net-rndis kmod-usb-net-cdc-ether usbutils
+```
+
+### Setting up Network interface `usb` and firewall zone `usb`
 - Netwok > Interfaces: Add interface `usb`
 - IP address is `192.168.2.1/24`
 - Netwok > Interfaces - Firewall settings: Add `usb` zone
@@ -39,10 +44,6 @@ This program is for a weather display on old Kindle 3 based on the original work
 - Network > Firewall - Traffic Rules: `22/tcp`, `123/udp`, `53/udp` and `icmp` set open both incoming and outgoing
 - Setup `123/udp`, `53/udp` and `icmp` for snat
 
-### USB network installation
-```
-# opkg install kmod-usb-net kmod-usb-net-rndis kmod-usb-net-cdc-ether usbutils
-```
 ### uci output
 ```
 firewall.@zone[2]=zone
@@ -147,7 +148,7 @@ system.@system[0].zonename='<Zone Name>'
 system.@system[0].timezone='<Time Zone>'
 ```
 
-### Kindle Weather Display server setup
+### Setting up Kindle Weather Display server
 Copy kindle-weather-display-for-openwrt to OpenWrt
 ```
 # opkg install unzip
@@ -172,7 +173,7 @@ Edit crontab and restart cron
 
 `createSVGv2.py` runs at hourly intervals and create these files: `KindleStation.svg`, `KindleStation.png` and `KindleStation_flatten.png`
 
-## Kindle setup
+## Setting up Kindle
 Copy kindle-weather-display-for-openwrt to Kindle
 ```
 # scp kindle-weather-display-for-openwrt.zip root@192.168.2.2:/tmp
@@ -203,7 +204,7 @@ Edit crontab and restart cron
 ```
 `cron` starts to run to download `KindleStation_flatten.png` from OpenWrt server and synchronize the clock at hourly intervals
 
-Create ssh rsa key
+Creating ssh rsa key
 ```
 # mkdir /mnt/us/.ssh
 # cd /mnt/us/.ssh
@@ -230,7 +231,7 @@ The key's randomart image is:
 +----[SHA256]-----+ 
 # scp -i /mnt/us/.ssh/id_rsa id_rsa.pub root@192.168.2.1:/tmp
 ```
-Add pub key to OpenWrt
+Adding pub key to OpenWrt
 ```
 # cat /tmp/id_rsa.pub >> /etc/dropbear/authorized_keys
 ```
