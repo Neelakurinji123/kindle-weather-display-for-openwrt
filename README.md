@@ -171,20 +171,20 @@ Edit crontab and restart cron
 # /etc/init.d/cron start
 ```
 
-`createSVGv2.py` runs at hourly intervals and create these files: `KindleStation.svg`, `KindleStation.png` and `KindleStation_flatten.png`
+`createSVGv2.py` runs at hourly intervals and creates these files: `KindleStation.svg`, `KindleStation.png` and `KindleStation_flatten.png`
 
 ## Setting up Kindle
 Copy kindle-weather-display-for-openwrt to Kindle
 ```
 # scp kindle-weather-display-for-openwrt.zip root@192.168.2.2:/tmp
 ```
-Login to Kindle and copy these files
+Login to Kindle and copy the following files to Kindle:
 ```
 # ssh root@192.168.2.2
 # cd /tmp
 # unzip kindle-weather-display-for-openwrt.zip
-# mv kindle-weather-display-for-openwrt/kindle/kindle-weather /mnt/us
-# mv kindle-weather-display-for-openwrt/kindle/launchpad /mnt/us
+# mv kindle-weather-display-for-openwrt/kindle/kindle-weather /mnt/us/
+# mv kindle-weather-display-for-openwrt/kindle/launchpad/KindleWeather.ini /mnt/us/launchpad/
 # cd /mnt/us/kindle-weather
 # mv disable enable
 ```
@@ -209,7 +209,7 @@ Edit crontab and restart cron
 # kill $(pidof crond)
 # /etc/init.d/cron start
 # pidof crond
-mntroot ro
+# mntroot ro
 ```
 `cron` starts to run to download `KindleStation_flatten.png` from OpenWrt server and synchronize the clock at hourly intervals
 
