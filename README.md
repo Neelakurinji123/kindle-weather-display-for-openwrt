@@ -171,7 +171,7 @@ Edit crontab and restart cron
 # /etc/init.d/cron start
 ```
 
-`createSVGv2.py` runs at hourly intervals and create these files: `KindleStation.svg`, `KindleStation.png` and `KindleStation_flatten.png`
+`createSVGv2.py` runs at hourly intervals and creates these files: `KindleStation.svg`, `KindleStation.png` and `KindleStation_flatten.png`
 
 ## Setting up Kindle
 Copy kindle-weather-display-for-openwrt to Kindle
