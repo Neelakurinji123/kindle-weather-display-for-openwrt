@@ -188,19 +188,28 @@ Login to Kindle and copy these files
 # cd /mnt/us/kindle-weather
 # mv disable enable
 ```
-Edit crontab and restart cron
+Create tmpfs
 ```
 # mntroot rw
+# mkdir /tmp_data
+# nano /etc/fstab
+
+tmpfs             /tmp_data     tmpfs  defaults,size=16m 0 0
+
+# mount -a
+```
+Edit crontab and restart cron
+```
 # nano /etc/crontab/root
 
 2 * * * * sh -c "/mnt/us/kindle-weather/weather-script.sh"
 0 * * * * sh -c "/usr/bin/ntpdate 0.jp.pool.ntp.org"
 
-# mntroot ro
 # /etc/init.d/cron stop
 # kill $(pidof crond)
 # /etc/init.d/cron start
 # pidof crond
+mntroot ro
 ```
 `cron` starts to run to download `KindleStation_flatten.png` from OpenWrt server and synchronize the clock at hourly intervals
 
