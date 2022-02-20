@@ -178,7 +178,7 @@ Copy kindle-weather-display-for-openwrt to Kindle
 ```
 # scp kindle-weather-display-for-openwrt.zip root@192.168.2.2:/tmp
 ```
-Login to Kindle and copy these files
+Login to Kindle and copy the following files to Kindle:
 ```
 # ssh root@192.168.2.2
 # cd /tmp
