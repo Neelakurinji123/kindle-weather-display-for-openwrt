@@ -204,7 +204,7 @@ Edit crontab and restart cron
 ```
 `cron` starts to run to download `KindleStation_flatten.png` from OpenWrt server and synchronize the clock at hourly intervals
 
-Creating ssh rsa key
+Create ssh rsa key
 ```
 # mkdir /mnt/us/.ssh
 # cd /mnt/us/.ssh
