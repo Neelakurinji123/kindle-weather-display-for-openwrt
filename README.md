@@ -19,6 +19,13 @@ This program is for a weather display on old Kindle 3 based on the original work
 - API key for CloudConvert
 - Jailbroken Kindle 3
 
+## Creating API key for CloudConvert
+Create API key with the following options:
+- user.read: View your user data 
+- user.write: Update your user data 
+- task.read: View your task and job data 
+- task.write: Update your task and job dat
+
 ## Setting up OpenWrt
 
 ### Installing Python 3
