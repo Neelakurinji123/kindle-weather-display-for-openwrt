@@ -24,7 +24,7 @@ Create API key with the following options:
 - user.read: View your user data 
 - user.write: Update your user data 
 - task.read: View your task and job data 
-- task.write: Update your task and job dat
+- task.write: Update your task and job data
 
 ## Setting up OpenWrt
 
