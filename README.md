@@ -205,6 +205,17 @@ tmpfs             /tmp_data     tmpfs  defaults,size=16m 0 0
 
 # mount -a
 ```
+Set up additional network configurations
+```
+# nano /etc/resolv.conf
+
+nameserver 8.8.8.8
+nameserver 1.1.1.1
+
+# ip r add default via 192.168.2.1
+# sh -c "/usr/bin/ntpdate 0.jp.pool.ntp.org"
+22 Feb 03:14:13 ntpdate[18859]: adjust time server 129.250.35.251 offset -0.007174 sec
+```
 Edit crontab and restart cron
 ```
 # nano /etc/crontab/root
