@@ -9,8 +9,14 @@ if [ -f /mnt/us/kindle-weather/enable ]; then
         /etc/init.d/framework stop
     fi
 
+    if [ ! -d "/tmp_data" ]; then
+        echo "(root)/tmp_data doesn't exist!"
+        exit 1
+    fi
+
     if ! $(mount -l | grep -q 'tmpfs on /tmp_data'); then
-        mount -a
+        #mount -a
+        mount -t tmpfs -o size=16M tmpfs /tmp_data
         sleep 3
     fi
 
