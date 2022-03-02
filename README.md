@@ -11,7 +11,7 @@ This program is for a weather display on old Kindle 3 based on the original work
 <img src="/sample_screenshots/KindleStation.png" height="400" alt="Kindle 3 Screenshot" /><img src="https://user-images.githubusercontent.com/70471447/154597426-2da949ff-90e9-4416-af16-47f2413bda54.jpg" height="400">
 
 ## Requirements
-- Minimum 256M/100M OpenWrt router
+- Minimum 256M/100M OpenWrt router (e.g. OrangePi zero)
 - USB port x1
 - LAN port x1
 - API key for OpenWeatherMap
