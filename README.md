@@ -11,7 +11,7 @@ This program is for a weather display on old Kindle 3 based on the original work
 <img src="/sample_screenshots/KindleStation.png" height="400" alt="Kindle 3 Screenshot" /><img src="https://user-images.githubusercontent.com/70471447/154597426-2da949ff-90e9-4416-af16-47f2413bda54.jpg" height="400">
 
 ## Requirements
-- Minimum 256M/100M OpenWrt router
+- Minimum 256M/100M OpenWrt router (e.g. OrangePi zero)
 - USB port x1
 - LAN port x1
 - API key for OpenWeatherMap
@@ -154,6 +154,44 @@ network.usb.ipaddr='192.168.2.1'
 system.@system[0].zonename='<Zone Name>'
 system.@system[0].timezone='<Time Zone>'
 ```
+## Edit config file: settings.json
+```
+    "station": {
+        "city": "Tokorozawa",
+        "timezone": "Asia/Tokyo",
+        "encoding": "iso-8859-1",
+        "locale": "en_US.UTF-8",
+        "font": "Droid Sans",
+        "sunrise_and_sunset": "True",
+        "darkmode": "False",
+        "service": "onecall",
+        "api_key": "ae5a2cde41a19943cea13985fc4c6675",
+        "lat": "35.4761",
+        "lon": "139.2810",
+        "units": "metric",
+        "lang": "en",
+        "exclude": "minutely",
+        "alerts": "True",
+        "cloudconvert": "True",
+        "converter": "convert",
+        "graph": "False",
+        "graph_object": [{"name": "temperature",
+                          "start": 0, "end": 24, "step": 1, "basis": "hour",
+                          "type": "line", "stroke": 4,
+                          "stroke-color": "rgb(105,105,105)",
+                          "fill": "rgb(169,169,169)",
+                          "stroke-linecap": "round",
+                          "label": "True", "label_adjust": "True"},
+                         {"name": "precipitation",
+                          "start": 0, "end": 24, "step": 1, "basis": "hour",
+                          "type": "bar", "stroke": 15,
+                          "stroke-color": "rgb(105,105,105)",
+                          "fill": "rgb(245,245,245)",
+                          "stroke-linecap": "butt",
+                          "label": "False", "label_adjust": "False"}]
+    }
+}
+```
 
 ### Setting up Kindle Weather Display server
 Copy kindle-weather-display-for-openwrt to OpenWrt
@@ -171,7 +209,8 @@ Edit crontab and restart cron
 ```
 # crontab -e
 
-0 * * * * sh -c "/opt/kindle-weather-station/kindle-weather.sh"
+0 */2 * * * sh -c "/opt/kindle-weather-station/kindle-weather.sh"
+0 1-23/2 * * * sh -c "/opt/kindle-weather-station/kindle-weather.sh settings_graph.json"
 ```
 ```
 # /etc/init.d/cron stop
