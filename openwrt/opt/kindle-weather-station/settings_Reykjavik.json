@@ -16,6 +16,7 @@
         "exclude": "minutely",
         "alerts": "True",
         "cloudconvert": "True",
-        "converter": "convert"
+        "converter": "convert",
+        "graph": "False"
     }
 }

@@ -1,6 +1,6 @@
 {
     "station": {
-        "city": "Tokorozawa",
+        "city": "所沢",
         "timezone": "Asia/Tokyo",
         "encoding": "utf-8",
         "locale": "ja_JP.UTF-8",
@@ -16,6 +16,7 @@
         "exclude": "minutely",
         "alerts": "True",
         "cloudconvert": "True",
-        "converter": "convert"
+        "converter": "convert",
+        "graph": "False"
     }
 }

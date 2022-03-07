@@ -42,33 +42,727 @@ i18nfile = "i18n.json"
 coverter = 'convert'
 
 
+class Header:
+    def __init__(self, p):
+        self.p = p
+
+    def text(self):
+        tz = timezone(self.p.t_timezone)
+        p = self.p
+        curt_weather = self.p.current_weather()
+        t_now = self.p.t_now
+        tz = timezone(self.p.t_timezone)
+        sunrise_and_sunset = self.p.sunrise_and_sunset
+        svg_text = str()
+
+        svg_text += '''<?xml version="1.0" encoding="{}"?>
+<svg xmlns="http://www.w3.org/2000/svg" height="800" width="600" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink">\n'''.format(p.encoding)
+        svg_text += '<g font-family="{}">\n'.format(p.font)
+        #svg_text += '<g font-family="{}">\n'.format("Chalkboard")
+        #svg_text += '<g font-family="{}">\n'.format("Arial")
+
+        return svg_text
+
+
+class Maintenant:
+    def __init__(self, p, base_x, base_y):
+        self.p = p
+        self.base_x = base_x
+        self.base_y = base_y
+
+    def text(self):
+        p = self.p
+        curt_weather = p.current_weather()
+        tz = timezone(p.t_timezone)
+        t_now = p.t_now
+        x = self.base_x
+        y = self.base_y
+        sunrise_and_sunset = p.sunrise_and_sunset
+        svg_text = str()
+
+        if sunrise_and_sunset == True:
+            if curt_weather[11] == 0:
+                t_sunrise = "n/a"
+            else:
+                t_sunrise = str(datetime.fromtimestamp(curt_weather[11], tz).strftime("%H:%M"))
+
+            if curt_weather[12] == 0:
+                t_sunset = "n/a"
+            else:
+                t_sunset = str(datetime.fromtimestamp(curt_weather[12], tz).strftime("%H:%M"))
+
+            # localtime
+            maintenant = (str.lower(datetime.fromtimestamp(t_now, tz).strftime("%a, %d %b %H:%M")))
+
+            w = maintenant.split()
+            d = read_i18n(p)
+            w[0] = d["abbreviated_weekday"][w[0][:-1]] + ',' if not d == dict() else w[0]
+            w[2] = d["abbreviated_month"][w[2]] if not d == dict() else w[2]
+
+            svg_text += SVGtext("start", "30px", (x + 20), (y + 40), ' '.join(w)).svg()
+            svg_text += SVGtext("end", "30px", (x + 445), (y + 40), t_sunrise).svg()
+            svg_text += SVGtext("end", "30px", (x + 580),(y + 40),t_sunset).svg()
+        else:
+            maintenant = str.lower(datetime.fromtimestamp(t_now, tz).strftime("%a %Y/%m/%d %H:%M"))
+            w = maintenant.split()
+            d = read_i18n(p)
+            w[0] = d["abbreviated_weekday"][w[0]] if not d == dict() else w[0]
+            svg_text += SVGtext("start", "30px", (x + 20), (y + 40), p.city).svg()
+            svg_text += SVGtext("end", "30px", (x + 580), (y + 40), ' '.join(w)).svg()
+
+        return svg_text
+
+
+    def icon(self):
+        p = self.p
+        tz = timezone(p.t_timezone)
+        curt_weather = p.current_weather()
+        sunrise_and_sunset = self.p.sunrise_and_sunset
+        x = self.base_x
+        y = self.base_y
+        svg_icon = str()
+
+        if p.sunrise_and_sunset == True:
+            svg_icon += SVGtransform("(1.1,0,0,1.1," + str(x + 332) + "," + str(y + 14) + ")", p.header_icons['sunrise']).svg() 
+            svg_icon += SVGtransform("(1.1,0,0,1.1," + str(x + 467) + "," + str(y + 14) + ")", p.header_icons['sunset']).svg()
+
+        return svg_icon
+
+
+class CurrentWeather:
+
+    def add_curt_weather_prec(self):
+        p = self.p
+        curt_weather = p.current_weather()
+        x = self.base_x
+        y = self.base_y
+        svg_text = str()
+
+        # probability of precipitation
+        if (curt_weather[2] == 'Rain' or curt_weather[2] == 'Drizzle' or
+                curt_weather[2] == 'Snow' or curt_weather[2] == 'Sleet' or curt_weather[2] == 'Clouds'):
+
+            r = Decimal(curt_weather[14]).quantize(Decimal('0.1'), rounding=ROUND_HALF_EVEN)
+
+            if r == 0:
+                svg_text += SVGtext("end", "45px", (x + 200 - int(s_padding(r) * 0.64)), (y + 135), "n/a").svg()
+
+            else:
+                svg_text += SVGtext("end", "45px", (x + 195 - int(s_padding(r) * 0.64)), (y + 135), \
+                          Decimal(float(r)).quantize(Decimal('0.1'), rounding=ROUND_HALF_UP)).svg()
+
+        return svg_text
+
+    def add_curt_weather_temp(self):
+        p = self.p
+        curt_weather = p.current_weather()
+        today_forecast = p.daily_forecast(0)
+        x = self.base_x
+        y = self.base_y
+        disc_offset = self.disc_offset
+        wordwrap= self.wordwrap
+        svg_text = str()
+
+        # Temperature
+        tempEntier = math.floor(curt_weather[5])
+        tempDecimale = 10 * (curt_weather[5] - tempEntier)
+
+        svg_text += SVGtext("end", "100px", (x + 155), (y + 315), int(tempEntier)).svg()
+        svg_text += SVGtext("start", "50px", (x + 150), (y + 310), "." + str(int(tempDecimale))).svg()
+        svg_text += SVGcircle((x + 170), (y + 245), 7, "black", 3, "none").svg()
+        svg_text += SVGtext("start", "35px", (x + 180), (y + 265), p.unit['temp']).svg()
+
+        # Max temp
+        svg_text += SVGtext("end", "35px", (x + 280), (y + 275), int(math.ceil(today_forecast[7]))).svg()
+        svg_text += SVGcircle((x + 285), (y + 255), 4, "black", 3, "none").svg()
+        svg_text += SVGtext("start", "25px", (x + 290), (y + 267), p.unit['temp']).svg()
+
+        # Line
+        svg_text += SVGline((x + 220), (x + 320), (y + 282), (y + 282), "fill:none;stroke:black;stroke-width:1px;").svg()
+
+        # Min temp
+        svg_text += SVGtext("end", "35px", (x + 280), (y + 315), int(math.ceil(today_forecast[6]))).svg()
+        svg_text += SVGcircle((x + 285), (y + 295), 4, "black", 3, "none").svg()
+        svg_text += SVGtext("start", "25px", (x + 290), (y + 307), p.unit['temp']).svg()
+        return svg_text
+
+    def add_curt_weather_pres(self):
+        p = self.p
+        curt_weather = p.current_weather()
+        x = self.base_x
+        y = self.base_y
+
+        # Pressure
+        svg_text = SVGtext("end", "30px", (x + 280 + self.disc_offset),(y + 370), str(round(curt_weather[6])) + p.unit['pressure']).svg()
+        return svg_text
+
+    def add_curt_weather_humi(self):
+        p = self.p
+        curt_weather = p.current_weather()
+        x = self.base_x
+        y = self.base_y
+
+        # Humidity
+        svg_text = SVGtext("end", "30px", (x + 155 + self.disc_offset), (y + 370), str(round(curt_weather[7])) + "%").svg()
+        return svg_text
+
+    def add_curt_weather_wind(self):
+        p = self.p
+        curt_weather = p.current_weather()
+        x = self.base_x
+        y = self.base_y
+
+        # Wind
+        svg_text = SVGtext("end", "30px", (x + 85 + self.disc_offset),(y + 370), str(int(curt_weather[8])) + p.unit['wind_speed']).svg()
+        return svg_text
+
+    def add_curt_weather_disc(self):
+        curt_weather = self.p.current_weather()
+        x = self.base_x
+        y = self.base_y
+        svg_text = str()
+
+        # Description
+        disc = text_split(length=self.wordwrap, text=curt_weather[3])
+        for w in disc:
+            svg_text += SVGtext("end", "30px", (x + 280 + self.disc_offset), (y + 410), w).svg()
+            y += 35
+
+        return svg_text
+
+    def add_curt_weather_icon(self):
+        x = self.base_x
+        y = self.base_y
+        svg_icon = SVGtransform("(4,0,0,4," + str(x - 30) + "," + str(y - 80) + ")", self.p.current_icons[0]).svg()
+        return svg_icon
+
+    def add_curt_weather_wind_icon(self):
+        p = self.p
+        curt_weather = p.current_weather()
+        x = self.base_x
+        y = self.base_y
+        r = p.current_icons['cardinal']
+        _x = x - 10 - len(str(int(curt_weather[8]))) * 17 + self.disc_offset
+        svg_icon = SVGtransform("(1.6,0,0,1.6," + str(_x) + "," + str(y + 336) + ")", r).svg()
+
+        return svg_icon
+
+
+class CurrentWeatherNoAlerts(CurrentWeather):
+    def __init__(self, p, base_x, base_y, disc_offset, wordwrap):
+        self.p = p
+        self.base_x = base_x
+        self.base_y = base_y
+        self.disc_offset = disc_offset
+        self.wordwrap = wordwrap
+
+    def text(self):
+        prec = super(CurrentWeatherNoAlerts, self).add_curt_weather_prec() 
+        temp = super(CurrentWeatherNoAlerts, self).add_curt_weather_temp() 
+        pres = super(CurrentWeatherNoAlerts, self).add_curt_weather_pres() 
+        humi = super(CurrentWeatherNoAlerts, self).add_curt_weather_humi() 
+        wind = super(CurrentWeatherNoAlerts, self).add_curt_weather_wind() 
+        disc = super(CurrentWeatherNoAlerts, self).add_curt_weather_disc()
+        svg_text = prec + temp + pres + humi + wind + disc
+
+        return svg_text
+
+    def icon(self):
+        p = self.p
+        curt_weather = p.current_weather()
+        disc_offset = 0
+        svg_icon = str()
+
+        svg_icon += super(CurrentWeatherNoAlerts, self).add_curt_weather_icon()
+
+        if int(curt_weather[8]) != 0:        
+            svg_icon += super(CurrentWeatherNoAlerts, self).add_curt_weather_wind_icon() 
+
+        return svg_icon
+
+
+class CurrentWeatherAlerts(CurrentWeather):
+    def __init__(self, p, base_x, base_y, disc_offset, wordwrap):
+        self.p = p
+        self.base_x = base_x
+        self.base_y = base_y
+        self.disc_offset = disc_offset
+        self.wordwrap = wordwrap
+
+    def text(self):
+        base_x = self.base_x
+        base_y = self.base_y
+        svg_text = str()
+
+        svg_text += super(CurrentWeatherAlerts, self).add_curt_weather_prec()
+
+        self.base_x = 270
+        self.base_y = -160
+        svg_text += super(CurrentWeatherAlerts, self).add_curt_weather_temp()
+
+        self.base_x = 270
+        self.base_y = -165
+        svg_text += super(CurrentWeatherAlerts, self).add_curt_weather_pres()
+
+        self.base_x = 270
+        self.base_y = -165
+        svg_text += super(CurrentWeatherAlerts, self).add_curt_weather_humi()
+
+        self.base_x = 465
+        self.base_y = -125
+        svg_text += super(CurrentWeatherAlerts, self).add_curt_weather_wind()
+
+        self.base_x = 270
+        self.base_y = -165
+        svg_text += super(CurrentWeatherAlerts, self).add_curt_weather_disc()
+
+        return svg_text
+
+    def icon(self):
+        p = self.p
+        curt_weather = p.current_weather()
+        self.base_x = -5
+        self.base_y = 45
+        svg_icon = super(CurrentWeatherAlerts, self).add_curt_weather_icon()
+
+        if int(curt_weather[8]) != 0:
+            self.base_x = 450
+            self.base_y = -125
+            svg_icon = super(CurrentWeatherAlerts, self).add_curt_weather_wind_icon()
+
+        return svg_icon
+
+
+class HourlyWeather:
+    def __init__(self, p, base_x, base_y, h_hour, h_range, h_step, pitch):
+        self.p = p
+        self.base_x = base_x
+        self.base_y = base_y
+        self.h_hour = h_hour
+        self.h_range = h_range
+        self.h_step = h_step
+        self.pitch = pitch
+
+    # Hourly weather document area (base_x=370 ,base_y=40)
+    def text(self):
+        p = self.p
+        x = self.base_x
+        y = self.base_y
+        curt_weather = p.current_weather()
+        today_forecast = p.daily_forecast(0)
+        disc_offset = 0
+        wordwrap = 0
+        h_hour = self.h_hour
+        h_range = self.h_range
+        h_step = self.h_step
+        pitch = self.pitch
+        svg_text = str()
+   
+        # 3h forecast
+        for i in range(h_hour, h_range, h_step):
+            hourly_forecast = p.hourly_forecast(i)
+            jour = datetime.fromtimestamp(hourly_forecast[0], tz)
+
+            hours = {3: "three hours later", 6: "six hours later", 9: "nine hours later"}
+
+            d = read_i18n(p)
+            if not d == dict():
+                for k in hours.keys():
+                    hours[k] = d["hours"][hours[k]]
+
+            _svg = SVGtext("start", "25px", (x - 0), (y + 165), hours[i])
+            svg_text += _svg.svg()
+            svg_text += text_temp_unit(base_x=(x + 30), base_y=(y + 96), text=round(hourly_forecast[5]), unit=p.unit['temp'])
+
+
+            # probability of precipitation
+            w = hourly_forecast[2]
+            if w == 'Rain' or w == 'Drizzle' or w == 'Snow' or w == 'Sleet' or w == 'Clouds':
+                r = Decimal(hourly_forecast[7]).quantize(Decimal('0.1'), rounding=ROUND_HALF_EVEN)
+                if r == 0:
+                    s1 = SVGtext("end", "25px", int(x + 140 - s_padding(r) * 0.357), (y + 92), 'n/a')
+                    svg_text += s1.svg()
+                else:
+                    s1 = SVGtext("end", "25px", int(x + 137 - s_padding(r) * 0.357), (y + 92), r)
+                    svg_text += s1.svg()
+
+            y += pitch
+
+        return svg_text
+
+
+    def icon(self):
+        p = self.p
+        curt_weather = p.current_weather()
+        x = self.base_x
+        y = self.base_y
+        h_hour = self.h_hour
+        h_range = self.h_range
+        h_step = self.h_step
+        pitch = self.pitch
+        svg_icon = str()
+
+        for i in range(h_hour, h_range, h_step):
+            svg_icon += SVGtransform("(2.3,0,0,2.3," + str(x + 8) + "," + str(y - 32) + ")", p.hourly_icons[i]).svg()
+            y += pitch
+
+        return svg_icon
+
+
+class DailyWeather:
+    def __init__(self, p, base_x, base_y, d_range, pitch):
+        self.p = p
+        self.base_x = 0
+        self.base_y = 500
+        self.pitch = 90
+        self.d_range = 4
+
+    def text(self):
+        p = self.p
+        x = self.base_x
+        y = self.base_y
+        curt_weather = p.current_weather()
+        today_forecast = p.daily_forecast(0)
+        pitch = self.pitch
+        d_range = self.d_range        
+        disc_offset = 0
+        wordwrap = 0
+        svg_text = str()
+
+        minTemp = math.floor(min([p.daily_forecast(1)[6], p.daily_forecast(2)[6] , p.daily_forecast(3)[6]]))
+        maxTemp = math.ceil(max([p.daily_forecast(1)[7], p.daily_forecast(2)[7] , p.daily_forecast(3)[7]]))
+        pasTemp = 120 / (maxTemp-minTemp)
+
+        d = read_i18n(p)
+
+        # Drawing temp bars
+        for i in range(1, d_range):
+            forecast = p.daily_forecast(i)
+            tLow = math.floor(forecast[6])
+            tHigh = math.ceil(forecast[7])
+            jour = datetime.fromtimestamp(forecast[0], tz)
+            tMin = (int)(x + 355 + pasTemp * (tLow - minTemp))
+            tMax = (int)(x + 440 + pasTemp * (tHigh - minTemp))
+
+            w = str.lower(jour.strftime("%A"))
+            w = d["full_weekday"][w] if not d == dict() else w
+
+            svg_text += SVGtext("end", "35px", (x + 185), (y + 75), w).svg()
+            svg_text += text_temp_unit(base_x=tMin, base_y=(y + 75), text=int(tLow), unit=p.unit['temp'])
+            svg_text += text_temp_unit(base_x=int(tMax - s_padding(tHigh)), base_y=(y + 75), text=int(tHigh), unit=p.unit['temp'])
+            svg_text += SVGline(int(tMin + 40), int(tMax - 65), (y + 75 - 10), (y + 75 - 10), "fill:none;stroke:black;stroke-linecap:round;stroke-width:10px;").svg()
+            y += pitch
+
+        return svg_text
+
+
+    def icon(self):
+        p = self.p
+        x = self.base_x
+        y = self.base_y
+        curt_weather = p.current_weather()
+        pitch = self.pitch
+        d_range = self.d_range        
+        disc_offset = 0
+        svg_icon = str()
+
+        for i in range(1, d_range):
+            svg_icon += SVGtransform("(1.9,0,0,1.9,{},{})".format((x + 160), (y -30)), p.daily_icons[i]).svg()
+            y += pitch
+
+        return svg_icon
+
+
+class Alerts:
+    def __init__(self, p, base_x, base_y, max_y):
+        self.p = p
+        self.base_x = base_x
+        self.base_y = base_y
+        self.max_y = max_y
+
+    def text(self):
+        p = self.p
+        x = self.base_x
+        y = self.base_y
+        max_y = self.max_y
+        alerts = p.weather_alerts()
+        svg_text = str()
+
+        _c = text_split(length=35, text=alerts[0]['event'], start_text="ALERT: ")
+
+        for v in _c:
+            svg_text += SVGtext2("start", "bold", "30px", "20", y, str(v)).svg()
+            y += 40
+
+        x += 30
+        svg_text += SVGtext("start", "20px", x, y, "Description:").svg()
+
+        x += 10
+        length = 60
+        #length = 57
+        _c = alerts[0]['description']
+        _c = re.sub(r'\n', ' ', _c, flags=re.MULTILINE)
+        flag = True
+        _list = text_split(length=length, text=_c, match='\*')
+        for v in _list:
+            y += 30
+            if y > max_y:
+                v = v[:-2]
+                v += "..."
+                _text = SVGtext("start", "18px", x, y, str(v))
+                svg_text += _text.svg()
+                flag = False
+                break
+            else:
+                _text = SVGtext("start", "18px", x, y, str(v))
+                svg_text += _text.svg()
+
+        return svg_text
+
+
+class DrawGraph:
+    def __init__(self, p, base_x, base_y, canvas, object):
+        self.p = p
+        self.base_x = base_x
+        self.base_y = base_y
+        self.canvas = canvas
+        self.object = object
+
+    def draw(self):
+        if self.object['type'] == "line":
+            res = DrawGraph.line_graph(self)
+        elif self.object['type'] == "bar":
+            res = DrawGraph.bar_graph(self)
+
+        return res
+
+    def line_graph(self):
+        p = self.p
+        x = self.base_x
+        y = self.base_y
+        w = self.canvas["width"]
+        h = self.canvas["height"]
+        bgcolor = self.canvas["bgcolor"]
+        axis = self.canvas["axis"]
+        axis_color = self.canvas["axis_color"]
+        grid = self.canvas["grid"]
+        grid_color = self.canvas["grid_color"]
+        stroke = self.object["stroke"]
+        stroke_color = self.object["stroke-color"]
+        graph_fill = self.object["fill"]
+        stroke_linecap = self.object["stroke-linecap"]
+        label = bool(eval(self.object["label"]))
+        label_adjust = bool(eval(self.object["label_adjust"]))
+        name = self.object["name"]
+        start = self.object["start"]
+        end = self.object["end"]
+        step = self.object["step"]
+        basis = self.object["basis"]
+        svg = '<g font-family="{}">\n'.format(p.font)
+        data = p.daily_forecast(0)
+        hourly  = p.hourly_forecast(5)
+
+        # Canvas
+        style = "fill:{};stroke:{};stroke-width:{}px;".format(bgcolor, bgcolor, (0))
+        svg += SVGrect(x=(x - 10), y=(y - h + 10), width=(w + 10), height=(h - 45), style=style).svg()
+        style = "fill:none;stroke:{};stroke-width:{}px;".format(axis_color, axis)
+
+        # Graph
+        points = str()
+        _text = str()
+
+        if basis == "hour":
+            t_min = min([p.hourly_forecast(n)[5] for n in range(start, end, step)])
+            t_max = max([p.hourly_forecast(n)[5] for n in range(start, end, step)])
+            t_step = 45 / (t_max - t_min) if (t_max - t_min) != 0 else 1
+        elif basis == "day":
+            t_min = min([p.daily_forecast(n)[5] for n in range(start, end, step)])
+            t_max = max([p.daily_forecast(n)[5] for n in range(start, end, step)])
+            t_step = 45 / (t_max - t_min) if (t_max - t_min) != 0 else 1
+
+        for n in range(start, end, step):
+            if basis == "hour":
+                hourly = p.hourly_forecast(n)
+                heure = datetime.fromtimestamp(hourly[0], tz).strftime('%H')
+                _x = x + 10 + int((w - 22) / (end - start - 1)) * n
+                _y = y - (hourly[5] - t_min) * t_step - 45
+                points += "{},{} ".format(_x, _y)
+
+                if int(heure) % 3 == 0:
+                    svg += SVGtext("end", "16px", (_x + 14), (_y - 9), "{} {}".format(int(hourly[5]), p.unit['temp'])).svg()
+                    svg += SVGcircle((_x + 3), (_y - 20), 2, "black", 1, "none").svg()
+                    if label == True and label_adjust == True:
+                        svg += SVGtext("middle", "16px", _x, (y - 9), "{}:00".format(heure)).svg()
+                    elif label == True and label_adjust == False:
+                        svg += SVGtext("middle", "16px", _x, (y - 15), "{}:00".format(heure)).svg()
+
+            elif basis == "day":
+                daily = p.daily_forecast(n)
+                jour = str.lower(datetime.fromtimestamp(daily[0], tz).strftime('%a'))
+                _x = x + 10 + int((w - 22)  / (end - start - 1)) * n
+                _y = y - (daily[5] - t_min) * t_step - 45
+                points += "{},{} ".format(_x, _y)
+                svg += SVGtext("end", "16px", (_x + 14), (_y - 9), "{} {}".format(int(daily[5]), p.unit['temp'])).svg()
+                svg += SVGcircle((_x + 3), (_y - 20), 2, "black", 1, "none").svg()
+                if label == True and label_adjust == True:
+                    svg += SVGtext("middle", "16px", _x, (y - 9), "{}".format(jour)).svg()
+                elif label == True and label_adjust == False:
+                    svg += SVGtext("middle", "16px", _x, (y - 15), "{}".format(jour)).svg()
+
+        _x = x + 10 + int((w - 22) / (end - start - 1)) * (end - 1)
+        _points = points + "{},{} {},{}".format(_x, (y + -35), (x + 10), (y + -35))
+        style2 = "fill:{};stroke:{};stroke-width:{}px;stroke-linecap:{};".format(graph_fill, graph_fill, "0", stroke_linecap)
+        svg += SVGpolyline(_points, style2).svg()
+        style = "fill:none;stroke:{};stroke-width:{}px;stroke-linecap:{};".format(stroke_color, stroke, stroke_linecap)
+        svg += SVGpolyline(points, style).svg()
+
+        # Text
+        svg += SVGtext("start", "16px", x, (y - h + 27), name).svg()
+        svg += '</g>'
+
+        return svg
+
+
+    def bar_graph(self):
+        p = self.p
+        x = self.base_x
+        y = self.base_y
+        w = self.canvas["width"]
+        h = self.canvas["height"]
+        bgcolor = self.canvas["bgcolor"]
+        axis = self.canvas["axis"]
+        axis_color = self.canvas["axis_color"]
+        grid = self.canvas["grid"]
+        grid_color = self.canvas["grid_color"]
+        stroke = self.object["stroke"]
+        stroke_color = self.object["stroke-color"]
+        graph_fill = self.object["fill"]
+        stroke_linecap = self.object["stroke-linecap"]
+        label = bool(eval(self.object["label"]))
+        label_adjust = bool(eval(self.object["label_adjust"]))
+        name = self.object["name"]
+        start = self.object["start"]
+        end = self.object["end"]
+        step = self.object["step"]
+        basis = self.object["basis"]
+        l_sum = float()
+
+        svg = '<g font-family="{}">\n'.format(p.font)
+        data = p.daily_forecast(0)
+        hourly  = p.hourly_forecast(5)
+
+        # Canvas
+        style = "fill:{};stroke:{};stroke-width:{}px;".format(bgcolor, bgcolor, (0))
+        svg += SVGrect(x=(x - 10), y=(y - h + 10), width=(w + 10), height=(h - 45), style=style).svg()
+
+        if basis == "hour" and name == "precipitation":
+            # Graph
+            l_min = min([p.hourly_forecast(n)[10] if not p.hourly_forecast(n)[10] is None else 0 for n in range(start, end, step)])
+            l_max = max([p.hourly_forecast(n)[10] if not p.hourly_forecast(n)[10] is None else 0 for n in range(start, end, step)])
+            l_sum = round(sum([p.hourly_forecast(n)[10] if not p.hourly_forecast(n)[10] is None else 0 for n in range(start, end, step)]), 2)
+
+            if l_max >= 100:
+                l_step = 60 / (l_max - l_min) if (l_max - l_min) != 0 else 1
+            elif 100 > l_max >= 50:
+                l_step = 55 / (l_max - l_min) if (l_max - l_min) != 0 else 1
+            elif 50 > l_max >= 10:
+                l_step = 50 / (l_max - l_min) if (l_max - l_min) != 0 else 1
+            elif 10 > l_max >= 1:
+                l_step = 40 / 10
+            else:
+                l_step = 30 
+
+            style = "fill:{};stroke:{};stroke-linecap:{};stroke-width:{}px;".format(graph_fill, stroke_color, stroke_linecap, stroke)
+            for n in range(start, end, step):
+                hourly = p.hourly_forecast(n)
+                heure = datetime.fromtimestamp(hourly[0], tz).strftime('%H')
+                _x = x + 10 + int((w - 22) / (end - start - 1)) * n
+                _y = y - (hourly[10] - l_min) * l_step - 35
+                svg += SVGline(_x, _x, (y - 35), _y, style).svg()
+
+                if l_max == hourly[10]:
+                    svg += SVGtext("middle", "16px", _x, (_y - 5), "max:{}".format(round(hourly[10],2))).svg()
+                    style2 = "fill:{};stroke:{};stroke-linecap:{};stroke-width:{}px;".format("rgb(0,0,0)", "rgb(0,0,0)", stroke_linecap, "1")
+                    svg += SVGline(_x, _x, _y, (_y - 3), style2).svg()
+                if int(heure) % 3 == 0:
+                    if label == True and label_adjust == True:
+                        svg += SVGtext("middle", "16px", _x, (y - 9), "{}:00".format(heure)).svg()
+                    elif label == True and label_adjust == False:
+                        svg += SVGtext("middle", "16px", _x, (y - 15), "{}:00".format(heure)).svg()
+
+        elif basis == "day" and name == "precipitation":
+            # Graph
+            l_min = min([p.daily_forecast(n)[10] if not p.daily_forecast(n)[10] is None else 0 for n in range(start, end, step)])
+            l_max = max([p.daily_forecast(n)[10] if not p.daily_forecast(n)[10] is None else 0 for n in range(start, end, step)])
+            l_sum = round(sum([p.daily_forecast(n)[10] if not p.daily_forecast(n)[10] is None else 0 for n in range(start, end, step)]), 2)
+
+            if l_max >= 100:
+                l_step = 60 / (l_max - l_min) if (l_max - l_min) != 0 else 1
+            elif 100 > l_max >= 50:
+                l_step = 55 / (l_max - l_min) if (l_max - l_min) != 0 else 1
+            elif 50 > l_max >= 10:
+                l_step = 50 / (l_max - l_min) if (l_max - l_min) != 0 else 1
+            elif 10 > l_max >= 1:
+                l_step = 40 / 10
+            else:
+                l_step = 30
+
+            style = "fill:{};stroke:{};stroke-linecap:{};stroke-width:{}px;".format(graph_fill, stroke_color, stroke_linecap, stroke)
+            for n in range(start, end, step):
+                daily = p.daily_forecast(n)
+                jour = str.lower(datetime.fromtimestamp(daily[0], tz).strftime('%a'))
+                _x = x + 10 + int((w  - 22) / (end - start - 1)) * n
+                _y = y - (daily[10] - l_min) * l_step - 35
+                svg += SVGline(_x, _x, (y - 35), _y, style).svg()
+
+                if l_max == daily[10]:
+                    svg += SVGtext("middle", "16px", _x, (_y - 5), "max:{}".format(round(daily[10],2))).svg()
+                    style2 = "fill:{};stroke:{};stroke-linecap:{};stroke-width:{}px;".format("rgb(0,0,0)", "rgb(0,0,0)", stroke_linecap, "1")
+                    svg += SVGline(_x, _x, _y, (_y - 3), style2).svg()
+
+                if label == True and label_adjust == True:
+                    svg += SVGtext("middle", "16px", _x, (y - 9), "{}:00".format(jour)).svg()
+                elif label == True and label_adjust == False:
+                    svg += SVGtext("middle", "16px", _x, (y - 15), "{}:00".format(jour)).svg()
+
+        style = "fill:none;stroke:{};stroke-width:{}px;".format(axis_color, 1)
+        svg += SVGline(x1=(x - 10), x2=(x + w), y1=(y - 35), y2=(y - 35), style=style).svg()
+
+        # Text
+        svg += SVGtext("start", "16px", x, (y - h + 27), "precipitation (total: {} mm)".format(l_sum)).svg()
+        svg += '</g>'
+
+        return svg
+
+
+# Reguler font
 class SVGtext:
-    def __init__(self, anchor, fontsize, x, y, va):
+    def __init__(self, anchor, fontsize, x, y, v):
         self.anchor = anchor
         self.fontsize = fontsize
         self.x = x
         self.y = y
-        self.va = va
+        self.v = v
 
-    def code(self):
+    def svg(self):
         res = '<text style="text-anchor:{};" font-size="{}" x="{}" y="{}">{}</text>\n'.\
-               format(self.anchor, self.fontsize, self.x, self.y, self.va)
+               format(self.anchor, self.fontsize, self.x, self.y, self.v)
 
         return res 
 
-
+# Bold font
 class SVGtext2:
-    def __init__(self, anchor, fontweight, fontsize, x, y, va):
+    def __init__(self, anchor, fontweight, fontsize, x, y, v):
         self.anchor = anchor
         self.fontweight = fontweight
         self.fontsize = fontsize
         self.x = x
         self.y = y
-        self.va = va
+        self.v = v
 
-    def code(self):
+    def svg(self):
         res = '<text style="text-anchor:{};" font-weight="{}" font-size="{}" x="{}" y="{}">{}</text>\n'.\
-               format(self.anchor, self.fontweight, self.fontsize, self.x, self.y, self.va)
+               format(self.anchor, self.fontweight, self.fontsize, self.x, self.y, self.v)
 
         return res
 
@@ -82,7 +776,7 @@ class SVGcircle:
         self.width = width
         self.fill = fill
 
-    def code(self):
+    def svg(self):
         res = '<circle cx="{}" cy="{}" r="{}" stroke="{}" stroke-width="{}" fill="{}"/>\n'.\
                format(self.cx, self.cy, self.r, self.stroke, self.width, self.fill)
 
@@ -97,7 +791,7 @@ class SVGline:
         self.y2 = y2
         self.style = style
 
-    def code(self):
+    def svg(self):
         res = '<line x1="{}" x2="{}" y1="{}" y2="{}" style="{}"/>\n'.\
                 format(self.x1, self.x2, self.y1, self.y2, self.style)
 
@@ -109,9 +803,30 @@ class SVGtransform:
         self.matrix = matrix
         self.obj = obj
 
-    def code(self):
+    def svg(self):
         res  = '<g transform="matrix{}">{}</g>\n'.format(self.matrix, self.obj)
 
+        return res
+
+class SVGpolyline:
+    def __init__(self, points, style):
+        self.points = points
+        self.style = style
+
+    def svg(self):
+        res = '<polyline points="{}" style="{}"/>\n'.format(self.points, self.style)
+        return res
+
+class SVGrect:
+    def __init__(self, x, y, width, height, style):
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.style = style
+
+    def svg(self):
+        res = '<rect x="{}" y="{}" width="{}" height="{}" style="{}"/>\n'.format(self.x, self.y, self.width, self.height, self.style)
         return res
 
 
@@ -149,444 +864,124 @@ def text_split(length, text, start_text="" , match=""):
     return s
 
 
-def add_header(p, t_now, tz):
-    curt_weather = p.current_weather()
-    base_x = int(0)
-    base_y = int(40)
-    if p.sunrise_and_sunset == True:
-        if curt_weather[11] == 0:
-            t_sunrise = "n/a"
-        else:
-            t_sunrise = str(datetime.fromtimestamp(curt_weather[11], tz).strftime("%H:%M"))
-
-        if curt_weather[12] == 0:
-            t_sunset = "n/a"
-        else:
-            t_sunset = str(datetime.fromtimestamp(curt_weather[12], tz).strftime("%H:%M"))
-
-        # localtime
-        maintenant = (str.lower(datetime.fromtimestamp(t_now, tz).strftime("%a, %d %b %H:%M")))
-        w = maintenant.split()
-        d = read_i18n(p)
-        w[0] = d["abbreviated_weekday"][w[0][:-1]] + ',' if not d == dict() else w[0]
-        w[2] = d["abbreviated_month"][w[2]] if not d == dict() else w[2]
-        s_text1 = SVGtext("start", "30px", (base_x + 20), (base_y + 0), ' '.join(w))
-        s_text2 = SVGtext("end", "30px", (base_x + 445), (base_y + 0), t_sunrise)
-        s_text3 = SVGtext("end", "30px", (base_x + 580),(base_y + 0),t_sunset)
-
-        s = s_text1.code() + s_text2.code() + s_text3.code()
-
-    else:
-        maintenant = str.lower(datetime.fromtimestamp(t_now, tz).strftime("%a %Y/%m/%d %H:%M"))
-        w = maintenant.split()
-        d = read_i18n(p)
-        w[0] = d["abbreviated_weekday"][w[0]] if not d == dict() else w[0]
-        s_text1 = SVGtext("start", "30px", (base_x + 20), (base_y + 0), p.city)
-        s_text2 = SVGtext("end", "30px", (base_x + 580), (base_y + 0), ' '.join(w))
-        s = s_text1.code() + s_text2.code()
-
-    return s
-
-
-def add_alerts(p, base_y, max_y):
-    alerts = p.weather_alerts()
-    s = str()
-    c = text_split(length=35, text=alerts[0]['event'], start_text="ALERT: ")
-
-    for v in c:
-        s_text = SVGtext2("start", "bold", "30px", "20", base_y, str(v))
-        s += s_text.code()
-        base_y += 40
-
-    s_text = SVGtext("start", "20px", "30", base_y, "Description:")
-    s += s_text.code()
-    base_y += 30
-
-    v1 = alerts[0]['description']
-    v1 = re.sub(r'\n', ' ', v1, flags=re.MULTILINE)
-    base_x = 40
-    length = 60
-    #length = 57
-    flag = True
-    v1_list = text_split(length=length, text=v1, match='\*')
-    for v2 in v1_list:
-        if base_y > max_y -35:
-            v2 = v2[:-2]
-            v2 += "..."
-            s_text = SVGtext("start", "18px", base_x, base_y, str(v2))
-            s += s_text.code()
-            flag = False
-            break
-        else:
-            s_text = SVGtext("start", "18px", base_x, base_y, str(v2))
-            s += s_text.code()
-
-        base_y += 30
-
-    return s
-
-
-def add_curt_weather_disc(p, base_x, base_y, disc_offset=0, wordwrap=0):
-    curt_weather = p.current_weather()
-    today_forecast = p.daily_forecast(0)
-    s = str()
-
-    # Temperature
-    tempEntier = math.floor(curt_weather[5])
-    tempDecimale = 10 * (curt_weather[5] - tempEntier)
-
-    s1_temp1 = SVGtext("end", "100px", (base_x + 25), (base_y - 130), int(tempEntier))
-    s1_temp2 = SVGtext("start", "50px", (base_x + 20), (base_y - 135), "." + str(int(tempDecimale)))
-    s1_temp3 = SVGcircle((base_x + 40), (base_y - 200), 7, "black", 3, "none")
-    s1_temp4 = SVGtext("start", "35px", (base_x + 50), (base_y - 180), p.unit['temp'])
-    s1_temp_text = s1_temp1.code() + s1_temp2.code() + s1_temp3.code() + s1_temp4.code()
-
-    # Max
-    s3_max1 = SVGtext("end", "35px", (base_x + 150), (base_y - 170), int(math.ceil(today_forecast[7])))
-    s3_max2 = SVGcircle((base_x + 155), (base_y - 190), 4, "black", 3, "none")
-    s3_max3 = SVGtext("start", "25px", (base_x + 160), (base_y - 178), p.unit['temp'])
-
-    # line
-    s3_line = SVGline((base_x + 90), (base_x + 190), (base_y - 163), (base_y - 163), "fill:none;stroke:black;stroke-width:1px;")
-
-    # Min
-    s3_min1 = SVGtext("end", "35px", (base_x + 150), (base_y - 130), int(math.ceil(today_forecast[6])))
-    s3_min2 = SVGcircle((base_x + 155), (base_y - 150), 4, "black", 3, "none")
-    s3_min3 = SVGtext("start", "25px", (base_x + 160), (base_y - 138), p.unit['temp'])
-    s3_minmax_text = s3_max1.code() + s3_max2.code() + s3_max3.code() + s3_line.code() + s3_min1.code() + s3_min2.code() + s3_min3.code()
-
-    if p.alerts == True and not p.weather_alerts() is None:
-        # Pressure
-        s2_pres = SVGtext("end", "30px", (base_x + 150 + disc_offset),(base_y - 80), str(round(curt_weather[6])) + p.unit['pressure'])
-
-        # Humidity
-        s2_humi = SVGtext("end", "30px", (base_x + 0 + disc_offset), (base_y - 80), str(round(curt_weather[7])) + "%")
-
-        # Wind
-        s2_wind = SVGtext("end", "30px", (base_x + 150 + disc_offset),(base_y - 40), str(int(curt_weather[8])) + " " + p.unit['wind_speed'])
-
-        # description
-        disc = [curt_weather[3]]
-        s2_desc_text = str()
-        n = 0
-        for w in disc:
-            s2_desc_text += SVGtext("end", "30px", (base_x + 150 + disc_offset), (base_y + n), w).code()
-            n += 35
-    else:
-        base_y += 5
-        # Pressure
-        s2_pres = SVGtext("end", "30px", (base_x + 150 + disc_offset),(base_y - 80), str(round(curt_weather[6])) + p.unit['pressure'])
-
-        # Humidity
-        s2_humi = SVGtext("end", "30px", (base_x + 25 + disc_offset), (base_y - 80), str(round(curt_weather[7])) + "%")
-
-        # Wind
-        s2_wind = SVGtext("end", "30px", (base_x - 45 + disc_offset),(base_y - 80), str(int(curt_weather[8])) + p.unit['wind_speed'])
-
-        # description
-        disc = text_split(length=wordwrap, text=curt_weather[3])
-        s2_desc_text = str()
-        n = 0
-        for w in disc:
-            s2_desc_text += SVGtext("end", "30px", (base_x + 150 + disc_offset), (base_y - 40 + n), w).code()
-            n += 35
-
-    s2_text = s2_pres.code() + s2_humi.code() + s2_wind.code() + s2_desc_text
-
-    s = s1_temp_text + s2_text + s3_minmax_text
-
-    return s
-
-
-def add_curt_weather_precipitation(p, base_x, base_y):
-    curt_weather = p.current_weather()
-    s = str()
-
-    # probability of precipitation
-    if (curt_weather[2] == 'Rain' or curt_weather[2] == 'Drizzle' or
-            curt_weather[2] == 'Snow' or curt_weather[2] == 'Sleet' or curt_weather[2] == 'Clouds'):
-
-        r = Decimal(curt_weather[14]).quantize(Decimal('0.1'), rounding=ROUND_HALF_EVEN)
-
-        if r == 0:
-            s1_prob = SVGtext("end", "45px", (base_x - 205 - int(s_padding(r) * 0.64)), (base_y - 105), "n/a")
-            s += s1_prob.code()
-
-        else:
-            s1_prob = SVGtext("end", "45px", (base_x - 210 - int(s_padding(r) * 0.64)), (base_y - 105), \
-                      Decimal(float(r)).quantize(Decimal('0.1'), rounding=ROUND_HALF_UP))
-            s += s1_prob.code()
-
-    return s
-
-
-def add_curt_weather(p, base_x, base_y, disc_offset, wordwrap):
-    curt_weather = p.current_weather()
-    s = str()
-
-    if p.alerts == True and not (p.weather_alerts() is None):
-        s += add_curt_weather_precipitation(p=p, base_x=400, base_y=280)
-    else:
-        s += add_curt_weather_precipitation(p=p, base_x=405, base_y=280)
-    s += add_curt_weather_disc(p=p, base_x=base_x, base_y=base_y, disc_offset=disc_offset, wordwrap=wordwrap)
-    return s
-
-
-def add_curt_weather_alerts(p, base_x, base_y):
-    curt_weather = p.current_weather()
-    s = str()
-
-    s += add_curt_weather_precipitation(p=p, base_x=base_x, base_y=base_y)
-    s += add_curt_weather_disc(p=p, base_x=base_x, base_y=base_y)
-
-    return s
-
-
 def text_temp_unit(base_x, base_y, text, unit):
-    s1_text1 = SVGtext("end", "35px", (base_x), (base_y), text)
-    s1_circle2 = SVGcircle((base_x + 5), (base_y - 25), 4, "black", 2, "none")
-    s1_text3 = SVGtext("start", "25px", (base_x + 10), (base_y  - 10), unit)
-
-    s = s1_text1.code() + s1_circle2.code() + s1_text3.code()
-
-    return s
+    svg = str()
+    svg += SVGtext("end", "35px", (base_x), (base_y), text).svg()
+    svg += SVGcircle((base_x + 5), (base_y - 25), 4, "black", 2, "none").svg()
+    svg += SVGtext("start", "25px", (base_x + 10), (base_y  - 10), unit).svg()
+    return svg
 
 
-def add_hourly_forecast_precipitation(hourly_forecast, base_x, base_y):
-    s = str()
-
-    # probability of precipitation
-    w = hourly_forecast[2]
-    if w == 'Rain' or w == 'Drizzle' or w == 'Snow' or w == 'Sleet' or w == 'Clouds':
-        r = Decimal(hourly_forecast[7]).quantize(Decimal('0.1'), rounding=ROUND_HALF_EVEN)
-        if r == 0:
-            s1 = SVGtext("end", "25px", int(base_x + 10 - s_padding(r) * 0.357), (base_y - 78), 'n/a')
-            s += s1.code()
-        else:
-            s1 = SVGtext("end", "25px", int(base_x + 7 - s_padding(r) * 0.357), (base_y - 78), r)
-            s += s1.code()
-
-    return s
-
-
-def add_hourly_forecast(p, tz, base_x, base_y, pitch):
-    hourly_icon = list()
-    s = str()
- 
-    # 3h forecast
-    for i in range(3, 12, 3):
-        hourly_forecast = p.hourly_forecast(i)
-        jour = datetime.fromtimestamp(hourly_forecast[0], tz)
-
-        hours = {3: "three hours later", 6: "six hours later", 9: "nine hours later"}
-
-        d = read_i18n(p)
-        if not d == dict():
-            for k in hours.keys():
-                hours[k] = d["hours"][hours[k]]
-
-        s1 = SVGtext("start", "25px", (base_x - 130), (base_y - 5), hours[i])
-        #s1 = SVGtext("end", "25px", (base_x + 80), (base_y - 5), hours[i])
-        s1_text1 = text_temp_unit(base_x=(base_x - 100), base_y=(base_y - 74), text=round(hourly_forecast[5]), unit=p.unit['temp'])
-        s1_text2 = add_hourly_forecast_precipitation(hourly_forecast=hourly_forecast, base_x=base_x, base_y=base_y)
-
-        s += s1.code() + s1_text1 + s1_text2
-
-        base_y += pitch
-
-    return s
-
-
-def add_daily_forecast(p, base_x, base_y, pitch):
-    minTemp = math.floor(min([p.daily_forecast(1)[6], p.daily_forecast(2)[6] , p.daily_forecast(3)[6]]))
-    maxTemp = math.ceil(max([p.daily_forecast(1)[7], p.daily_forecast(2)[7] , p.daily_forecast(3)[7]]))
-    pasTemp = 120 / (maxTemp-minTemp)
-
-    s = str()
-    n = 0
-    d = read_i18n(p)
-    for i in range(1, 4):
-        forecast = p.daily_forecast(i)
-        tLow = math.floor(forecast[6])
-        tHigh = math.ceil(forecast[7])
-        jour = datetime.fromtimestamp(forecast[0], tz)
-        tMin = (int)(base_x + 355 + pasTemp * (tLow - minTemp))
-        tMax = (int)(base_x + 440 + pasTemp * (tHigh - minTemp))
-
-        w = str.lower(jour.strftime("%A"))
-        w = d["full_weekday"][w] if not d == dict() else w
-
-        s1 = SVGtext("end", "35px", (base_x + 185), (base_y + n), w)
-        s1_text1 = text_temp_unit(base_x=tMin, base_y=(base_y + n), text=int(tLow), unit=p.unit['temp'])
-        s1_text2 = text_temp_unit(base_x=int(tMax - s_padding(tHigh)), base_y=(base_y + n), text=int(tHigh), unit=p.unit['temp'])
-        s1_line = SVGline(int(tMin + 40), int(tMax - 65), (base_y + n - 10), (base_y + n - 10), "fill:none;stroke:black;stroke-linecap:round;stroke-width:10px;")
-
-        s += s1.code() + s1_text1 + s1_text2 + s1_line.code()
-        n += pitch
-
-    return s
-
-
-def add_sunrise_and_sunset_icons(p):
-    r = p.header()
-    s = str()
-    s1 = SVGtransform("(1.1,0,0,1.1,332,14)", p.header.icons['sunrise']) 
-    s2 = SVGtransform("(1.1,0,0,1.1,467,14)", p.header.icons['sunset'])
-
-    return s1.code() + s2.code()
-
-
-def add_today_icon(p):
-    curt_weather = p.current_weather()
-    s = str()
-    if p.alerts == True and not (p.weather_alerts() is None):
-        s1 = SVGtransform("(4,0,0,4,-35,-40)", p.current_weather.icons[0])
-    else:
-        s1 = SVGtransform("(4,0,0,4,-30,-40)", p.current_weather.icons[0])
-    s = s1.code()
-
-    return s
-
-def add_wind_direction_icon(p, base_x, base_y, disc_offset=0):
-    curt_weather = p.current_weather()
-    s = str()
-    r = p.current_weather.icons['cardinal']
-    w = base_x + 40 - len(str(int(curt_weather[8]))) * 17 + disc_offset
-    s1 = SVGtransform("(1.6,0,0,1.6," + str(w) + "," + str(base_y - 74) + ")", r)
-    s += s1.code()
-
-    return s
-
-
-def add_next_hours_icons(p, base_x, base_y, pitch):
-    n = 0
-    s = str()
-    for i in range(3, 12, 3):
-        s1 = SVGtransform("(2.3,0,0,2.3," + str(base_x - 122) + "," + str(base_y - 202 + n) + ")", p.hourly_forecast.icons[i])
-        s += s1.code()
-        n += pitch
-
-    return s
-
-
-def add_next_days_icons(p, base_x, base_y, pitch):
-    n = 0
-    base_x = 160
-    base_y = 470
-    pitch = 90
-    s = str()
-    for i in range(1, 4):
-        s1 = SVGtransform("(1.9,0,0,1.9," + str(base_x) + "," + str(base_y + n) + ")", p.daily_forecast.icons[i])
-        s += s1.code()
-        n += pitch
-
-    return s
+def read_i18n(p):
+    with open(i18nfile, 'r') as f:
+        try:
+            res = json.load(f)["locale"][p.t_locale]
+        except:
+            res = dict()
+    return res
 
 
 def create_svg(p, t_now, tz, utc, svgfile, pngfile):
-
     svg_header = str()
     svg_text = str()
-    svg_icons = str()
+    svg_draw = str()
     svg_footer = str()
 
     f_svg = open(svgfile,"w", encoding=p.encoding)
 
-    # Header
-    svg_header += '''<?xml version="1.0" encoding="{}"?>
-<svg xmlns="http://www.w3.org/2000/svg" height="800" width="600" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink">\n'''.format(p.encoding)
-    svg_header += '<g font-family="{}">\n'.format(p.font)
-    #svg_header += '<g font-family="{}">\n'.format("Chalkboard")
-    #svg_header += '<g font-family="{}">\n'.format("Arial")
+    _header = Header(p=p)
+    svg_header += _header.text()
 
-    # Document area
-    svg_text += add_header(p=p, t_now=t_now, tz=tz)
+    _maintenant = Maintenant(p=p, base_x=0, base_y=0)
+    svg_text += _maintenant.text()
+    svg_draw += _maintenant.icon()
 
-    base_x = 130
-#    base_y = 480
-    base_y = 485
+    # Current weather area (base_x= ,base_y=40)
+    base_x = 5
+    base_y = 40
     disc_offset = 35
     wordwrap = 20
-    svg_text += add_curt_weather(p=p, base_x=base_x, base_y=base_y, disc_offset=disc_offset, wordwrap=wordwrap)
 
-    if p.sunrise_and_sunset == True:
-        svg_icons += add_sunrise_and_sunset_icons(p) 
+    _current = CurrentWeatherNoAlerts(p=p, base_x=base_x, base_y=base_y, disc_offset=disc_offset, wordwrap=wordwrap)
+    svg_text += _current.text()
+    svg_draw += _current.icon()
 
-    svg_icons += add_today_icon(p)
-
-    curt_weather = p.current_weather()
-    if int(curt_weather[8]) != 0:
-       base_y += 5 
-       svg_icons += add_wind_direction_icon(p=p, base_x=(base_x - 180), base_y=(base_y - 40), disc_offset=disc_offset)
-
-    base_x = 500
-    base_y = 210
-    #base_y = 200
+    # Hourly weather document area (base_x= ,base_y=40)
+    base_x = 370
+    base_y = 40
+    h_hour = 3
+    h_range = 12
+    h_step = 3
     pitch = 155
-    #pitch = 150
-    svg_text += add_hourly_forecast(p=p, tz=tz, base_x=base_x, base_y=base_y, pitch=pitch)
-    svg_icons += add_next_hours_icons(p=p, base_x=base_x, base_y=base_y, pitch=pitch)
 
+    _hourly = HourlyWeather(p, base_x=base_x, base_y=base_y, h_hour=h_hour, h_range=h_range, h_step=h_step, pitch=pitch)
+    svg_text += _hourly.text()
+    svg_draw += _hourly.icon()
+
+    # Daily weather document area (base_x=0 ,base_y=)
     base_x = 0
-    base_y = 575
+    base_y = 500
+    d_range = 4
     pitch = 90
-    svg_text += add_daily_forecast(p, base_x, base_y, pitch)
+
+
+    # area x=0,600 y=520,800(520+140+140)
+    base_x = 40
+    base_y = 660
+
+    if p.graph == True:
+        canvas = {"width": 530, "height": 140, "bgcolor": "rgb(220,220,220)", "axis": 0, \
+                      "axis_color": "rgb(0,0,0)", "grid": 0, "grid_color": "rgb(245,245,245)"}
+
+        for obj in p.graph_object:
+            svg_draw += DrawGraph(p=p, base_x=base_x, base_y=base_y, canvas=canvas, object=obj).draw()
+            base_y += 140
+    else:
+        _daily= DailyWeather(p=p, base_x=base_x, base_y=base_y, d_range=d_range, pitch=pitch)
+        svg_text += _daily.text()
+        svg_draw += _daily.icon()
+
     svg_text += '</g>\n'
-
-    base_x = 160
-    base_y = 470
-    pitch = 90
-    svg_icons += add_next_days_icons(p=p, base_x=base_x, base_y=base_y, pitch=pitch)
-
     svg_footer += '</svg>' 
-
-    f_svg.write(svg_header + svg_text + svg_icons + svg_footer)
-
-    # close file
+    f_svg.write(svg_header + svg_text + svg_draw + svg_footer)
     f_svg.close()
 
 
 def create_alerts_svg(p, t_now, tz, utc, svgfile, pngfile):
-
     svg_header = str()
     svg_text = str()
-    svg_icons = str()
+    svg_draw = str()
     svg_footer = str()
 
     f_svg = open(svgfile,"w", encoding=p.encoding)
 
-    # Header
-    svg_header += '''<?xml version="1.0" encoding="{}"?>
-<svg xmlns="http://www.w3.org/2000/svg" height="800" width="600" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink">\n'''.format(p.encoding)
-    svg_header += '<g font-family="{}">\n'.format(p.font)
-    #svg_header += '<g font-family="{}">\n'.format("Chalkboard")
-    #svg_header += '<g font-family="{}">\n'.format("Arial")
+    _header = Header(p=p)
+    svg_header += _header.text()
 
-    # Document area
-    svg_text += add_header(p=p, t_now=t_now, tz=tz)
+    _maintenant = Maintenant(p=p, base_x=0, base_y=0)
+    svg_text += _maintenant.text()
+    svg_draw += _maintenant.icon()
 
-    if p.sunrise_and_sunset == True:
-        svg_icons += add_sunrise_and_sunset_icons(p)
-
-    svg_icons += add_today_icon(p)
-
-    base_x = 400
-    base_y = 280
+    # Current weather area
+    base_x = -5
+    base_y = 45
     disc_offset = 0
-    svg_text += add_curt_weather_alerts(p=p, base_x=base_x, base_y=base_y)
+    wordwrap = 0
+    _current = CurrentWeatherAlerts(p=p, base_x=base_x, base_y=base_y, disc_offset=disc_offset, wordwrap=wordwrap)
+    svg_text += _current.text()
+    svg_draw += _current.icon()
 
-    curt_weather = p.current_weather()
-    if int(curt_weather[8]) != 0:
-         svg_icons += add_wind_direction_icon(p=p, base_x=base_x, base_y=base_y, disc_offset=disc_offset)
-
+    base_x = 0
     base_y = 340
     max_y = 800
-    svg_text += add_alerts(p=p, base_y=base_y, max_y=max_y)
-    svg_text += '</g>\n'
+    _alerts =  Alerts(p, base_x, base_y, max_y)
+    svg_text += _alerts.text()
 
+    svg_text += '</g>\n'
     svg_footer += '</svg>'
 
-    f_svg.write(svg_header + svg_text + svg_icons + svg_footer) 
+    f_svg.write(svg_header + svg_text + svg_draw + svg_footer) 
+
     # close file
     f_svg.close()
 
@@ -670,15 +1065,6 @@ def img_processing(p, svgfile, pngfile, pngtmpfile, mode):
         output = Popen(args)
 
     #t.sleep(3)
-
-
-def read_i18n(p):
-    with open(i18nfile, 'r') as f:
-        try:
-            d = json.load(f)["locale"][p.t_locale]
-        except:
-            d = dict()
-    return d
 
 
 if __name__ == "__main__":
