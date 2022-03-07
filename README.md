@@ -171,7 +171,8 @@ Edit crontab and restart cron
 ```
 # crontab -e
 
-0 * * * * sh -c "/opt/kindle-weather-station/kindle-weather.sh"
+0 */2 * * * sh -c "/opt/kindle-weather-station/kindle-weather.sh"
+0 1-23/2 * * * sh -c "/opt/kindle-weather-station/kindle-weather.sh settings_graph.json"
 ```
 ```
 # /etc/init.d/cron stop
