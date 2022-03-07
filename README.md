@@ -154,7 +154,7 @@ network.usb.ipaddr='192.168.2.1'
 system.@system[0].zonename='<Zone Name>'
 system.@system[0].timezone='<Time Zone>'
 ```
-## Edit config file: settings.json
+### Edit config file: settings.json
 ```
     "station": {
         "city": "Tokorozawa",
@@ -192,7 +192,11 @@ system.@system[0].timezone='<Time Zone>'
     }
 }
 ```
-
+### Test
+```
+# ./kindle-weather.sh settings_Mcmurdo-Station.json
+# cd /tmp
+```
 ### Setting up Kindle Weather Display server
 Copy kindle-weather-display-for-openwrt to OpenWrt
 ```
