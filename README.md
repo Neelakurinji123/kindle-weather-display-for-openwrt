@@ -238,7 +238,7 @@ Login to Kindle and copy the following files to Kindle:
 # cd /mnt/us/kindle-weather
 # mv disable enable
 ```
-Create tmpfs
+Create tmpfs to protect physical storage
 ```
 # mntroot rw
 # mkdir /tmp_data
