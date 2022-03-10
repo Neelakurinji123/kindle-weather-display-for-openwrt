@@ -1,0 +1,33 @@
+{
+    "station": {
+        "city": "Tokorozawa",
+        "timezone": "Asia/Tokyo",
+        "encoding": "iso-8859-1",
+        "locale": "en_US.UTF-8",
+        "font": "Droid Sans",
+        "sunrise_and_sunset": "True",
+        "darkmode": "False",
+        "service": "onecall",
+        "api_key": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "lat": "35.4761",
+        "lon": "139.2810",
+        "units": "metric",
+        "lang": "en",
+        "exclude": "minutely",
+        "alerts": "True",
+        "cloudconvert": "True",
+        "converter": "convert",
+        "graph": "True",
+        "graph_object": [{"name": "weather",
+                          "start": 0, "end": 8, "step": 1, "basis": "day",
+                          "type": "tile",
+                          "label": "True", "label_adjust": "True"},
+                         {"name": "moon phase",
+                          "start": 0, "end": 8, "step": 1, "basis": "day",
+                          "type": "tile", "stroke": 4,
+                          "stroke-color": "rgb(0,0,0)",
+                          "fill": "rgb(0,0,0)",
+                          "stroke-linecap": "round",
+                          "label": "False", "label_adjust": "False"}]
+    }
+}

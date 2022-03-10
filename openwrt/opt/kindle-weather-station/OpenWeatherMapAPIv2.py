@@ -54,14 +54,6 @@ class OpenWeatherMap:
 
         self.onecall = requests.get(url).json()
 
-        # test
-        #json_string = json.dumps(self.onecall)
-        #with open('openweather_data.json', 'w') as outfile:
-        #    outfile.write(json_string)
-        #
-        #with open('openweather_data.json', 'r') as json_file:
-        #    self.onecall = json.load(json_file)
-
         # sanity check
         if 'cod' in self.onecall and self.onecall['cod'] == 401:
             print('OpenWeatherMap: Invalid API Key')
@@ -94,51 +86,34 @@ class OpenWeatherMap:
 
         # Current data format
         # list - 0:time  1:id  2:weather  3:description  4:icon  5:temp  6:pressure  7:humidity  8:wind_speed  9:wind_direction  10:clouds
-        #        11:sunrise  12:sunset  13:precipitation  14:probability of precipitation  15:gust  16:rain or snow
+        #        11:sunrise  12:sunsetb  13:gust  14:precipitation
         #
-        d = self.onecall
+        c = self.onecall
+        d = c['current']
 
-        if not 'sunrise' in d['current']:
-            d['current']['sunrise'] = 0
+        if not 'sunrise' in d:
+            d['sunrise'] = 0
 
-        if not 'sunset' in d['current']:
-            d['current']['sunset'] = 0
+        if not 'sunset' in d:
+            d['sunset'] = 0
 
-        dat = [d['current']['dt'],
-               d['current']['weather'][0]['id'],
-               d['current']['weather'][0]['main'],
-               d['current']['weather'][0]['description'],
-               d['current']['weather'][0]['icon'],
-               d['current']['temp'],
-               d['current']['pressure'],
-               d['current']['humidity'],
-               d['current']['wind_speed'],
-               self.cardinal(d['current']['wind_deg']),
-               d['current']['clouds'],
-               d['current']['sunrise'],
-               d['current']['sunset']]
-
-        # hourly precipitation
-        #a = [(i, float(x['precipitation'])) for i, x in enumerate(d['minutely']) if i < 60]
-        #dat += [sum([y for x, y in a])]
-        dat += [None]
-
-        # hourly probability of precipitation
-        dat += [float(d['hourly'][1]['pop'])]
-
-       # gust
-        if 'wind_gust' in d['current']['weather'][0]:
-            dat += [float(d['current']['wind_gust'])]
+       # wind_speed
+        if 'gust' in d['weather'][0]:
+            gust = float(d['gust'])
         else:
-            dat += [None]
+            gust = None
 
         # rain or snow past a hour
-        if 'rain' in d['current']['weather'][0]:
-            dat += [float(d['current']['rain'])]
-        elif 'snow' in d['current']['weather'][0]:
-            dat += [float(d['current']['snow'])]
-        else:
-            dat += [None]
+        precipitation = 0
+        if 'rain' in d['weather'][0]:
+            precipitation = float(d['rain'])
+        elif 'snow' in d['weather'][0]:
+            precipitation = float(d['snow'])
+
+        dat = [int(d['dt']), int(d['weather'][0]['id']), str(d['weather'][0]['main']), str(d['weather'][0]['description']), \
+                  str(d['weather'][0]['icon']), float(d['temp']), int(d['pressure']), int(d['humidity']), float(d['wind_speed']), \
+                  self.cardinal(d['wind_deg']), float(d['clouds']), int(d['sunrise']), int(d['sunset']), \
+                  gust, precipitation]
 
         # fix icon
         p = {'id': dat[1], 'weather': dat[2], 'description': dat[3], 'icon': dat[4]}
@@ -154,37 +129,24 @@ class OpenWeatherMap:
     def hourly_forecast(self, hour):
 
         # Hourly forecast data format
-        # list - 0:time  1:id  2:weather  3:description  4:icon  5:temp  6:clouds  7:pop  8:wind gust  9:rain or snow  10:precipitation
-        d = self.onecall
-        d_hourly = d['hourly'][hour]
+        # list - 0:time  1:id  2:weather  3:description  4:icon  5:temp  6:clouds  7:pop  8:wind gust  9:wind_deg  10:precipitation 
 
-        wind_gust = d_hourly['wind_gust'] if 'wind_gust' in d_hourly else None
-        wind_deg = d_hourly['wind_deg'] if 'wind_deg' in d_hourly else None
+        d = self.onecall
+        h = d['hourly'][hour]
+
+        wind_gust = float(h['wind_gust']) if 'wind_gust' in h else None
+        wind_deg = float(h['wind_deg']) if 'wind_deg' in h else None
 
         precipitation = 0
-        if ('rain' in d_hourly) or ('snow' in d_hourly):
-            if 'rain' in d_hourly:
-                precipitation = float(d_hourly['rain']['1h'])
-            elif 'snow' in d_hourly:
-                precipitation = float(d_hourly['snow']['1h'])
+        if ('rain' in h) or ('snow' in h):
+            if 'rain' in h:
+                precipitation = float(h['rain']['1h'])
+            elif 'snow' in h:
+                precipitation = float(h['snow']['1h'])
 
-        dat = [int(d_hourly['dt']), int(d_hourly['weather'][0]['id']), str(d_hourly['weather'][0]['main']),
-               str(d_hourly['weather'][0]['description']), str(d_hourly['weather'][0]['icon']),
-               float(d_hourly['temp']), float(d_hourly['clouds']), float(d_hourly['pop']), wind_gust, wind_deg, precipitation]
-
-       # gust
-        if 'wind_gust' in d_hourly:
-            dat += [float(d_hourly['wind_gust'])]
-        else:
-            dat += [None]
-
-        # rain or snow for a hour
-        if 'rain' in d_hourly:
-            dat += [float(d_hourly['rain']['1h'])]
-        elif 'snow' in d_hourly:
-            dat += [float(d_hourly['snow']['1h'])]
-        else:
-            dat += [None]
+        dat = [int(h['dt']), int(h['weather'][0]['id']), str(h['weather'][0]['main']), str(h['weather'][0]['description']), \
+                  str(h['weather'][0]['icon']), float(h['temp']), float(h['clouds']), float(h['pop']), \
+                  wind_gust, self.cardinal(wind_deg), precipitation ]
 
         # fix icon
         p = {'id': dat[1], 'weather': dat[2], 'description': dat[3], 'icon': dat[4]}
@@ -199,28 +161,28 @@ class OpenWeatherMap:
     def daily_forecast(self, day):
 
         # Daily forecast data format
-        # list - 0:time  1:id  2:weather  3:description  4:icon  5:temp day 6:temp min  7:temp max  8:clouds  9: probability of precipitation
-        #        10:precipitation  11:wind gust  12:rain or snow
-        d = self.onecall
-        d_daily = d['daily'][day]
-        dat = [int(d_daily['dt']), int(d_daily['weather'][0]['id']), str(d_daily['weather'][0]['main']),
-               str(d_daily['weather'][0]['description']), str(d_daily['weather'][0]['icon']),
-               float(d_daily['temp']['day']), float(d_daily['temp']['min']), float(d_daily['temp']['max']),
-               float(d_daily['clouds']), float(d_daily['pop'])]
+        # list - 0:time  1:id  2:weather  3:description  4:icon  5:temp day 6:temp min  7:temp max  8:clouds  9: pop
+        #        10:precipitation  11:pressure  12:humidity  13:wind_speed  14:wind_deg  15:wind_gust
+        #        13:sunrise  14:sunset  15:moonrise  16:moonset 17:moon_phase
 
-       # gust
-        if 'wind_gust' in d_daily:
-            dat += [float(d_daily['wind_gust'])]
-        else:
-            dat += [None]
+        c = self.onecall
+        d = c['daily'][day]
 
-        # rain or snow past a hour
-        if 'rain' in d_daily:
-            dat += [float(d_daily['rain'])]
-        elif 'snow' in d_daily:
-            dat += [float(d_daily['snow'])]
-        else:
-            dat += [None]
+        wind_gust = float(d['wind_gust']) if 'wind_gust' in d else None
+        wind_deg = float(d['wind_deg']) if 'wind_deg' in d else None
+
+        precipitation = 0
+        if ('rain' in d) or ('snow' in d):
+            if 'rain' in d:
+                precipitation = float(d['rain'])
+            elif 'snow' in d:
+                precipitation = float(d['snow'])
+
+        dat = [int(d['dt']), int(d['weather'][0]['id']), str(d['weather'][0]['main']), str(d['weather'][0]['description']), \
+                   str(d['weather'][0]['icon']), float(d['temp']['day']), float(d['temp']['min']), float(d['temp']['max']), \
+                   float(d['clouds']), float(d['pop']), precipitation, float(d['pressure']), float(d['humidity']), \
+                   float(d['wind_speed']), self.cardinal(wind_deg), wind_gust, float(d['sunrise']), \
+                   float(d['sunset']), float(d['moonrise']), float(d['moonset']), float(d['moon_phase'])]
 
         # fix icon
         p = {'id': dat[1], 'weather': dat[2], 'description': dat[3], 'icon': dat[4]}
@@ -261,7 +223,7 @@ class OpenWeatherMap:
         elif 213.75 <= degree <= 258.75: return 'SW'
         elif 258.75 <= degree <= 303.75: return 'W'
         elif 303.75 <= degree <= 348.75: return 'NW'
-
+        else: return None
 
     def add_icon(self, s):
         if s == 'Clear-day':
@@ -349,7 +311,8 @@ class OpenWeatherMap:
             return get_DirectionRight_icon()
         elif s == 'NW':
             return get_DirectionDownRight_icon()
-
+        else:
+            return None
 
     def set_unit(self, s):
         if self.units == 'metric':

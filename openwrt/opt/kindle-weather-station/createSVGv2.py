@@ -23,6 +23,7 @@ import math
 import sys
 import json
 import re
+import math
 from datetime import datetime, timedelta, date
 from pytz import timezone
 import pytz
@@ -360,25 +361,24 @@ class HourlyWeather:
    
         # 3h forecast
         for i in range(h_hour, h_range, h_step):
-            hourly_forecast = p.hourly_forecast(i)
-            jour = datetime.fromtimestamp(hourly_forecast[0], tz)
+            hourly = p.hourly_forecast(i)
+            jour = datetime.fromtimestamp(hourly[0], tz)
 
-            hours = {3: "three hours later", 6: "six hours later", 9: "nine hours later"}
+            hrs = {3: "three hours later", 6: "six hours later", 9: "nine hours later"}
 
             d = read_i18n(p)
             if not d == dict():
-                for k in hours.keys():
-                    hours[k] = d["hours"][hours[k]]
+                for k in hrs.keys():
+                    hrs[k] = d["hours"][hours[k]]
 
-            _svg = SVGtext("start", "25px", (x - 0), (y + 165), hours[i])
-            svg_text += _svg.svg()
-            svg_text += text_temp_unit(base_x=(x + 30), base_y=(y + 96), text=round(hourly_forecast[5]), unit=p.unit['temp'])
+            svg_text += SVGtext("start", "25px", (x - 0), (y + 165), hrs[i]).svg()
+            svg_text += temp_unit(x=(x + 30), y=(y + 96), text=round(hourly[5]), unit=p.unit['temp'])
 
 
             # probability of precipitation
-            w = hourly_forecast[2]
+            w = hourly[2]
             if w == 'Rain' or w == 'Drizzle' or w == 'Snow' or w == 'Sleet' or w == 'Clouds':
-                r = Decimal(hourly_forecast[7]).quantize(Decimal('0.1'), rounding=ROUND_HALF_EVEN)
+                r = Decimal(hourly[7]).quantize(Decimal('0.1'), rounding=ROUND_HALF_EVEN)
                 if r == 0:
                     s1 = SVGtext("end", "25px", int(x + 140 - s_padding(r) * 0.357), (y + 92), 'n/a')
                     svg_text += s1.svg()
@@ -393,7 +393,6 @@ class HourlyWeather:
 
     def icon(self):
         p = self.p
-        curt_weather = p.current_weather()
         x = self.base_x
         y = self.base_y
         h_hour = self.h_hour
@@ -421,16 +420,15 @@ class DailyWeather:
         p = self.p
         x = self.base_x
         y = self.base_y
-        curt_weather = p.current_weather()
-        today_forecast = p.daily_forecast(0)
+        daily = p.daily_forecast
         pitch = self.pitch
         d_range = self.d_range        
         disc_offset = 0
         wordwrap = 0
         svg_text = str()
 
-        minTemp = math.floor(min([p.daily_forecast(1)[6], p.daily_forecast(2)[6] , p.daily_forecast(3)[6]]))
-        maxTemp = math.ceil(max([p.daily_forecast(1)[7], p.daily_forecast(2)[7] , p.daily_forecast(3)[7]]))
+        minTemp = math.floor(min([daily(1)[6], daily(2)[6] , daily(3)[6]]))
+        maxTemp = math.ceil(max([daily(1)[7], daily(2)[7] , daily(3)[7]]))
         pasTemp = 120 / (maxTemp-minTemp)
 
         d = read_i18n(p)
@@ -448,8 +446,8 @@ class DailyWeather:
             w = d["full_weekday"][w] if not d == dict() else w
 
             svg_text += SVGtext("end", "35px", (x + 185), (y + 75), w).svg()
-            svg_text += text_temp_unit(base_x=tMin, base_y=(y + 75), text=int(tLow), unit=p.unit['temp'])
-            svg_text += text_temp_unit(base_x=int(tMax - s_padding(tHigh)), base_y=(y + 75), text=int(tHigh), unit=p.unit['temp'])
+            svg_text += temp_unit(x=tMin, y=(y + 75), text=int(tLow), unit=p.unit['temp'])
+            svg_text += temp_unit(x=int(tMax - s_padding(tHigh)), y=(y + 75), text=int(tHigh), unit=p.unit['temp'])
             svg_text += SVGline(int(tMin + 40), int(tMax - 65), (y + 75 - 10), (y + 75 - 10), "fill:none;stroke:black;stroke-linecap:round;stroke-width:10px;").svg()
             y += pitch
 
@@ -460,7 +458,6 @@ class DailyWeather:
         p = self.p
         x = self.base_x
         y = self.base_y
-        curt_weather = p.current_weather()
         pitch = self.pitch
         d_range = self.d_range        
         disc_offset = 0
@@ -533,6 +530,8 @@ class DrawGraph:
             res = DrawGraph.line_graph(self)
         elif self.object['type'] == "bar":
             res = DrawGraph.bar_graph(self)
+        elif self.object['type'] == "tile":
+            res = DrawGraph.tile(self)
 
         return res
 
@@ -549,7 +548,7 @@ class DrawGraph:
         grid_color = self.canvas["grid_color"]
         stroke = self.object["stroke"]
         stroke_color = self.object["stroke-color"]
-        graph_fill = self.object["fill"]
+        fill = self.object["fill"]
         stroke_linecap = self.object["stroke-linecap"]
         label = bool(eval(self.object["label"]))
         label_adjust = bool(eval(self.object["label_adjust"]))
@@ -559,8 +558,6 @@ class DrawGraph:
         step = self.object["step"]
         basis = self.object["basis"]
         svg = '<g font-family="{}">\n'.format(p.font)
-        data = p.daily_forecast(0)
-        hourly  = p.hourly_forecast(5)
 
         # Canvas
         style = "fill:{};stroke:{};stroke-width:{}px;".format(bgcolor, bgcolor, (0))
@@ -589,8 +586,9 @@ class DrawGraph:
                 points += "{},{} ".format(_x, _y)
 
                 if int(heure) % 3 == 0:
-                    svg += SVGtext("end", "16px", (_x + 14), (_y - 9), "{} {}".format(int(hourly[5]), p.unit['temp'])).svg()
+                    svg += SVGtext("end", "16px", (_x + 14), (_y - 9), "{} {}".format(round(int(hourly[5])), p.unit['temp'])).svg()
                     svg += SVGcircle((_x + 3), (_y - 20), 2, "black", 1, "none").svg()
+
                     if label == True and label_adjust == True:
                         svg += SVGtext("middle", "16px", _x, (y - 9), "{}:00".format(heure)).svg()
                     elif label == True and label_adjust == False:
@@ -599,19 +597,19 @@ class DrawGraph:
             elif basis == "day":
                 daily = p.daily_forecast(n)
                 jour = str.lower(datetime.fromtimestamp(daily[0], tz).strftime('%a'))
-                _x = x + 10 + int((w - 22)  / (end - start - 1)) * n
+                _x = x + 25 + int((w - 50)  / (end - start - 1)) * n
                 _y = y - (daily[5] - t_min) * t_step - 45
                 points += "{},{} ".format(_x, _y)
                 svg += SVGtext("end", "16px", (_x + 14), (_y - 9), "{} {}".format(int(daily[5]), p.unit['temp'])).svg()
                 svg += SVGcircle((_x + 3), (_y - 20), 2, "black", 1, "none").svg()
+
                 if label == True and label_adjust == True:
                     svg += SVGtext("middle", "16px", _x, (y - 9), "{}".format(jour)).svg()
                 elif label == True and label_adjust == False:
                     svg += SVGtext("middle", "16px", _x, (y - 15), "{}".format(jour)).svg()
 
-        _x = x + 10 + int((w - 22) / (end - start - 1)) * (end - 1)
-        _points = points + "{},{} {},{}".format(_x, (y + -35), (x + 10), (y + -35))
-        style2 = "fill:{};stroke:{};stroke-width:{}px;stroke-linecap:{};".format(graph_fill, graph_fill, "0", stroke_linecap)
+        _points = points + "{},{} {},{}".format(_x, (y - 35), (x + 10), (y - 35))
+        style2 = "fill:{};stroke:{};stroke-width:{}px;stroke-linecap:{};".format(fill, fill, "0", stroke_linecap)
         svg += SVGpolyline(_points, style2).svg()
         style = "fill:none;stroke:{};stroke-width:{}px;stroke-linecap:{};".format(stroke_color, stroke, stroke_linecap)
         svg += SVGpolyline(points, style).svg()
@@ -648,8 +646,8 @@ class DrawGraph:
         l_sum = float()
 
         svg = '<g font-family="{}">\n'.format(p.font)
-        data = p.daily_forecast(0)
-        hourly  = p.hourly_forecast(5)
+        #data = p.daily_forecast(0)
+        #hourly  = p.hourly_forecast(5)
 
         # Canvas
         style = "fill:{};stroke:{};stroke-width:{}px;".format(bgcolor, bgcolor, (0))
@@ -711,7 +709,7 @@ class DrawGraph:
             for n in range(start, end, step):
                 daily = p.daily_forecast(n)
                 jour = str.lower(datetime.fromtimestamp(daily[0], tz).strftime('%a'))
-                _x = x + 10 + int((w  - 22) / (end - start - 1)) * n
+                _x = x + 25 + int((w  - 50) / (end - start - 1)) * n
                 _y = y - (daily[10] - l_min) * l_step - 35
                 svg += SVGline(_x, _x, (y - 35), _y, style).svg()
 
@@ -721,17 +719,233 @@ class DrawGraph:
                     svg += SVGline(_x, _x, _y, (_y - 3), style2).svg()
 
                 if label == True and label_adjust == True:
-                    svg += SVGtext("middle", "16px", _x, (y - 9), "{}:00".format(jour)).svg()
+                    svg += SVGtext("middle", "16px", _x, (y - 9), "{}".format(jour)).svg()
                 elif label == True and label_adjust == False:
-                    svg += SVGtext("middle", "16px", _x, (y - 15), "{}:00".format(jour)).svg()
+                    svg += SVGtext("middle", "16px", _x, (y - 15), "{}".format(jour)).svg()
 
         style = "fill:none;stroke:{};stroke-width:{}px;".format(axis_color, 1)
         svg += SVGline(x1=(x - 10), x2=(x + w), y1=(y - 35), y2=(y - 35), style=style).svg()
 
         # Text
-        svg += SVGtext("start", "16px", x, (y - h + 27), "precipitation (total: {} mm)".format(l_sum)).svg()
+        svg += SVGtext("start", "16px", x, (y - h + 27), "{} (total: {} mm)".format(name, l_sum)).svg()
         svg += '</g>'
 
+        return svg
+
+    def tile(self):
+        p = self.p
+        x = self.base_x
+        y = self.base_y
+        w = self.canvas["width"]
+        h = self.canvas["height"]
+        bgcolor = self.canvas["bgcolor"]
+        axis = self.canvas["axis"]
+        axis_color = self.canvas["axis_color"]
+        grid_y = self.canvas["grid"]
+        grid_y_color = self.canvas["grid_color"]
+        stroke = self.object["stroke"] if "stroke" in self.object else None
+        stroke_color = self.object["stroke-color"] if "stroke-color" in self.object else None
+        fill = self.object["fill"] if "fill" in self.object else None
+        stroke_linecap = self.object["stroke-linecap"] if "stroke-linecap" in self.object else None
+        label = bool(eval(self.object["label"]))
+        label_adjust = bool(eval(self.object["label_adjust"]))
+        name = self.object["name"]
+        start = self.object["start"]
+        end = self.object["end"]
+        step = self.object["step"]
+        basis = self.object["basis"]
+        svg = svg = '<g font-family="{}">\n'.format(p.font)
+        icons = str()
+
+        tz = timezone(p.t_timezone)
+        t_now = p.t_now
+        
+        # Canvas
+        style = "fill:{};stroke:{};stroke-width:{}px;".format(bgcolor, bgcolor, (0))
+        svg += SVGrect(x=(x - 10), y=(y - h + 10), width=(w + 10), height=(h - 45), style=style).svg()
+        style = "fill:none;stroke:{};stroke-width:{}px;".format(axis_color, axis)
+
+        # Graph
+        points = str()
+        _text = str()
+
+        for n in range(start, end, step):
+            if basis == "day" and name == "weather":
+                daily = p.daily_forecast(n)
+                jour = str.lower(datetime.fromtimestamp(daily[0], tz).strftime('%a'))
+                _x = x + 25 + int((w - 50)  / (end - start - 1)) * n
+                _y = y - 45
+
+                icons += SVGtransform("(1.0,0,0,1.0,{},{})".format((_x - 53), (_y - 105)), p.daily_icons[n]).svg()
+                svg += SVGtext("start", "16px", (_x - 32), (_y - 10), "hi:").svg()
+                svg += SVGtext("end", "16px", (_x + 26), (_y - 10), "{} {}".format(round(daily[7]), p.unit['temp'])).svg()
+                svg += SVGcircle((_x + 15), (_y - 21), 2, "black", 1, "none").svg()
+                svg += SVGtext("start", "16px", (_x - 32), (_y + 7), "lo:").svg()
+                svg += SVGtext("end", "16px", (_x + 26), (_y + 7), "{} {}".format(round(daily[6]), p.unit['temp'])).svg()
+                svg += SVGcircle((_x + 15), (_y - 4), 2, "black", 1, "none").svg()
+
+                if n < (end - 1):
+                    style = "fill:none;stroke:{};stroke-linecap:{};stroke-width:{}px;".format(grid_y_color, stroke_linecap, grid_y)
+                    icons += SVGline((_x + 30), (_x + 30), (_y - h + 55), (_y + 10), style).svg()
+
+                if label == True and label_adjust == True:
+                    svg += SVGtext("middle", "16px", _x, (y - 9), "{}".format(jour)).svg()
+                elif label == True and label_adjust == False:
+                    svg += SVGtext("middle", "16px", _x, (y - 15), "{}".format(jour)).svg()
+
+            elif basis == "day" and name == "moon phase":
+                daily = p.daily_forecast(n)
+                jour = str.lower(datetime.fromtimestamp(daily[0], tz).strftime('%a'))
+                lat = float(p.lat)
+                _x = x + 25 + int((w - 50)  / (end - start - 1)) * n
+                _y = y - 45
+                r =14
+
+                # 360d = 2pi(rad)
+                pi = math.pi
+                rad = daily[20] * pi * 2
+
+                # icon
+                style = "fill:{};stroke:{};stroke-width:{}px;".format(fill, stroke_color, 1)
+                icons += SVGcircle((_x - 3), (_y - 53), (r + 2), stroke_color, stroke, "none").svg()
+
+                #lat = -1  # test
+
+                if lat >= 0:
+                    if rad < pi / 2:
+                        px1 = math.cos(pi / 2 + rad * 0.025 * math.sin(rad)) * r + (_x - 3)
+                        py1 = math.sin(pi / 2 + rad * 0.025 * math.sin(rad)) * r + (_y - 53)
+                        px2 = math.cos(pi / 2 + rad * 0.025 * math.sin(rad)) * r + (_x - 3)
+                        py2 = -math.sin(pi / 2 + rad * 0.025 * math.sin(rad)) * r + (_y - 53)
+
+                        r1 = 1 * r
+                        r2 = (math.cos(rad) * (r - 2))
+                        r3 = 1 * ( r - 2)
+                        d = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 1 {} {}z".format(px1, py1, r1, r1, px2, py2, r2, r3, px1, py1)
+                        icons += SVGpath(d, style).svg()
+
+                        #px1 = math.cos(rad) * r + (_x - 3)
+                        #py1 = math.sin(rad) * r + (_y - 53)
+                        #px2 = math.cos(rad) * r + (_x - 3)
+                        #py2 = -math.sin(rad) * r + (_y - 53)
+
+                        ##r2 = 5 * r  # test
+                        #r1 = 1 * r
+                        #r2 = ((1 + math.sin(rad)) / math.cos(rad) if math.cos(rad) != 0 else math.inf) * r / 2   # 1 - infinity
+                        # d = "M{} {} A{} {} 0 0 1 {} {} {} {} 0 0 1 {} {}z".format(px1, py1, r1, r1, px2, py2, r2, r2, px1, py1)
+
+                        #r1 = 1 * r
+                        #d = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 0 {} {}z".format(px1, py1, r1, r1, px2, py2, r2, r2, px1, py1)
+                        #icons += SVGpath(d, style).svg()
+
+                    elif pi > rad >= pi / 2:
+                        px1 = math.cos(pi * 0.5 - rad * 0.025 * math.sin(rad)) * r + (_x - 3)
+                        py1 = math.sin(pi * 0.5 - rad * 0.025 * math.sin(rad)) * r + (_y - 53)
+                        px2 = math.cos(pi * 0.5 - rad * 0.025 * math.sin(rad)) * r + (_x - 3)
+                        py2 = -math.sin(pi * 0.5 - rad * 0.025 * math.sin(rad)) * r + (_y - 53)
+
+                        r1 = 1 * r
+                        r2 = (math.cos(rad) * (r - 2))
+                        r3 = 1 * ( r - 2)
+                        d = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 0 {} {}z".format(px1, py1, r1, r1, px2, py2, r2, r3, px1, py1)
+                        icons += SVGpath(d, style).svg()
+
+                    elif pi * 1.5 > rad >= pi:
+                        px1 = math.cos(pi * 0.5 - rad * 0.025 * math.sin(rad)) * r + (_x - 3)
+                        py1 = math.sin(pi * 0.5 - rad * 0.025 * math.sin(rad)) * r + (_y - 53)
+                        px2 = math.cos(pi * 0.5 - rad * 0.025 * math.sin(rad)) * r + (_x - 3)
+                        py2 = -math.sin(pi * 0.5 - rad * 0.025 * math.sin(rad)) * r + (_y - 53)
+
+                        r1 = 1 * r
+                        r2 = (math.cos(rad) * (r - 2))
+                        r3 = 1 * ( r - 2)
+                        d = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 0 {} {}z".format(px1, py1, r1, r1, px2, py2, r2, r3, px1, py1)
+                        icons += SVGpath(d, style).svg()
+
+                    else:
+                        px1 = math.cos(pi * 0.5 + rad * 0.025 * math.sin(rad)) * r + (_x - 3)
+                        py1 = math.sin(pi * 0.5 + rad * 0.025 * math.sin(rad)) * r + (_y - 53)
+                        px2 = math.cos(pi * 0.5 + rad * 0.025 * math.sin(rad)) * r + (_x - 3)
+                        py2 = -math.sin(pi * 0.5 + rad * 0.025 * math.sin(rad)) * r + (_y - 53)
+
+                        r1 = 1 * r
+                        r2 = (math.cos(rad) * (r - 2))
+                        r3 = 1 * ( r - 2)
+                        d = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 0 {} {}z".format(px1, py1, r1, r1, px2, py2, r2, r3, px1, py1) # base
+                        icons += SVGpath(d, style).svg()
+
+                else:
+                    if rad < pi / 2:
+                        px1 = math.cos(pi * 1.5 - rad * 0.025 * math.sin(rad)) * r + (_x - 3)
+                        py1 = math.sin(pi * 1.5 - rad * 0.025 * math.sin(rad)) * r + (_y - 53)
+                        px2 = math.cos(pi * 1.5 - rad * 0.025 * math.sin(rad)) * r + (_x - 3)
+                        py2 = -math.sin(pi * 1.5 - rad * 0.025 * math.sin(rad)) * r + (_y - 53)
+
+                        r1 = 1 * r
+                        r2 = (math.cos(rad) * (r - 2))
+                        r3 = 1 * ( r - 2)
+                        d = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 1 {} {}z".format(px1, py1, r1, r1, px2, py2, r2, r3, px1, py1)
+                        icons += SVGpath(d, style).svg()
+
+                    elif pi > rad >= pi / 2:
+                        px1 = math.cos(pi * 1.5 + rad * 0.025 * math.sin(rad)) * r + (_x - 3)
+                        py1 = math.sin(pi * 1.5 + rad * 0.025 * math.sin(rad)) * r + (_y - 53)
+                        px2 = math.cos(pi * 1.5 + rad * 0.025 * math.sin(rad)) * r + (_x - 3)
+                        py2 = -math.sin(pi * 1.5 + rad * 0.025 * math.sin(rad)) * r + (_y - 53)
+
+                        r1 = 1 * r
+                        r2 = (math.cos(rad) * (r - 2))
+                        r3 = 1 * ( r - 2)
+                        d = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 0 {} {}z".format(px1, py1, r1, r1, px2, py2, r2, r3, px1, py1)
+                        icons += SVGpath(d, style).svg()
+
+                    elif pi * 1.5 > rad >= pi:
+                        px1 = math.cos(pi * 1.5 + rad * 0.025 * math.sin(rad)) * r + (_x - 3)
+                        py1 = math.sin(pi * 1.5 + rad * 0.025 * math.sin(rad)) * r + (_y - 53)
+                        px2 = math.cos(pi * 1.5 + rad * 0.025 * math.sin(rad)) * r + (_x - 3)
+                        py2 = -math.sin(pi * 1.5 + rad * 0.025 * math.sin(rad)) * r + (_y - 53)
+
+                        r1 = 1 * r
+                        r2 = (math.cos(rad) * (r - 2))
+                        r3 = 1 * ( r - 2)
+                        d = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 0 {} {}z".format(px1, py1, r1, r1, px2, py2, r2, r3, px1, py1)
+                        icons += SVGpath(d, style).svg()
+
+                    else:
+                        px1 = math.cos(pi * 1.5 - rad * 0.025 * math.sin(rad)) * r + (_x - 3)
+                        py1 = math.sin(pi * 1.5 - rad * 0.025 * math.sin(rad)) * r + (_y - 53)
+                        px2 = math.cos(pi * 1.5 - rad * 0.025 * math.sin(rad)) * r + (_x - 3)
+                        py2 = -math.sin(pi * 1.5 - rad * 0.025 * math.sin(rad)) * r + (_y - 53)
+
+                        r1 = 1 * r
+                        r2 = (math.cos(rad) * (r - 2))
+                        r3 = 1 * ( r - 2)
+                        d = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 0 {} {}z".format(px1, py1, r1, r1, px2, py2, r2, r3, px1, py1) # base
+                        icons += SVGpath(d, style).svg()
+
+                # moon rise and moon set
+                # t_moonrise = str(daily[20])  # test
+                t_moonrise = str(datetime.fromtimestamp(daily[18], tz).strftime("%H:%M"))
+                t_moonset = str(datetime.fromtimestamp(daily[19], tz).strftime("%H:%M"))
+
+                svg += SVGtext("start", "16px", (_x - 32), (_y - 10), "r:").svg()
+                svg += SVGtext("end", "16px", (_x + 26), (_y - 10), "{}".format(t_moonrise)).svg()
+                svg += SVGtext("start", "16px", (_x - 32), (_y + 7), "s:").svg()
+                svg += SVGtext("end", "16px", (_x + 26), (_y + 7), "{}".format(t_moonset)).svg()
+
+                if n < (end - 1):
+                    style = "fill:none;stroke:{};stroke-linecap:{};stroke-width:{}px;".format(grid_y_color, stroke_linecap, grid_y)
+                    icons += SVGline((_x + 30), (_x + 30), (_y - h + 55), (_y + 10), style).svg()
+
+                if label == True and label_adjust == True:
+                    svg += SVGtext("middle", "16px", _x, (y - 9), "{}".format(jour)).svg()
+                elif label == True and label_adjust == False:
+                    svg += SVGtext("middle", "16px", _x, (y - 15), "{}".format(jour)).svg()
+
+        # Text
+        #svg += SVGtext("start", "16px", x, (y - h + 27), "{}".format(name)).svg()
+        svg += '</g>'
+        svg += icons
         return svg
 
 
@@ -829,6 +1043,15 @@ class SVGrect:
         res = '<rect x="{}" y="{}" width="{}" height="{}" style="{}"/>\n'.format(self.x, self.y, self.width, self.height, self.style)
         return res
 
+class SVGpath:
+    def __init__(self, d, style):
+        self.d = d
+        self.style = style
+
+    def svg(self):
+        res = '<path d="{}" style="{}"/>\n'.format(self.d, self.style)
+        return res
+
 
 def s_padding(x):
     if x >= 100 : return -5
@@ -864,11 +1087,11 @@ def text_split(length, text, start_text="" , match=""):
     return s
 
 
-def text_temp_unit(base_x, base_y, text, unit):
+def temp_unit(x, y, text, unit):
     svg = str()
-    svg += SVGtext("end", "35px", (base_x), (base_y), text).svg()
-    svg += SVGcircle((base_x + 5), (base_y - 25), 4, "black", 2, "none").svg()
-    svg += SVGtext("start", "25px", (base_x + 10), (base_y  - 10), unit).svg()
+    svg += SVGtext("end", "35px", x, y, text).svg()
+    svg += SVGcircle((x + 5), (y - 25), 4, "black", 2, "none").svg()
+    svg += SVGtext("start", "25px", (x + 10), (y  - 10), unit).svg()
     return svg
 
 
@@ -931,7 +1154,7 @@ def create_svg(p, t_now, tz, utc, svgfile, pngfile):
 
     if p.graph == True:
         canvas = {"width": 530, "height": 140, "bgcolor": "rgb(220,220,220)", "axis": 0, \
-                      "axis_color": "rgb(0,0,0)", "grid": 0, "grid_color": "rgb(245,245,245)"}
+                      "axis_color": "rgb(0,0,0)", "grid": 3, "grid_color": "rgb(255,255,255)"}
 
         for obj in p.graph_object:
             svg_draw += DrawGraph(p=p, base_x=base_x, base_y=base_y, canvas=canvas, object=obj).draw()
