@@ -201,6 +201,7 @@ system.@system[0].timezone='<Time Zone>'
   - precipitation
   - weather
   - moon phases (WIP)
+  
   <img src="/sample_screenshots/KindleStation_graph3.png" height="360" alt="Kindle 3 Screenshot" />
  ### Test
 ```
