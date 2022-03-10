@@ -165,7 +165,7 @@ system.@system[0].timezone='<Time Zone>'
         "sunrise_and_sunset": "True",
         "darkmode": "False",
         "service": "onecall",
-        "api_key": "ae5a2cde41a19943cea13985fc4c6675",
+        "api_key": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
         "lat": "35.4761",
         "lon": "139.2810",
         "units": "metric",
