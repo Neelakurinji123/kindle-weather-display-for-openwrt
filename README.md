@@ -192,6 +192,16 @@ system.@system[0].timezone='<Time Zone>'
     }
 }
 ```
+### Optionally graph and tile of weather forecast are available
+- Hourly forecast
+  - temperature
+  - precipitation
+- Daily forecast
+  - temperature
+  - precipitation
+  - weather
+  - moon phase
+
 ### Test
 ```
 # ./kindle-weather.sh settings_Mcmurdo-Station.json
@@ -213,8 +223,8 @@ Edit crontab and restart cron
 ```
 # crontab -e
 
-0 */2 * * * sh -c "/opt/kindle-weather-station/kindle-weather.sh"
-0 1-23/2 * * * sh -c "/opt/kindle-weather-station/kindle-weather.sh settings_graph.json"
+0 */2 * * * sh -c "/opt/kindle-weather-station/kindle-weather.sh 2>>/tmp/kindle-weather-station.err"
+0 1-23/2 * * * sh -c "/opt/kindle-weather-station/kindle-weather.sh settings_graph.json 2>>/tmp/kindle-weather-station.err"
 ```
 ```
 # /etc/init.d/cron stop
