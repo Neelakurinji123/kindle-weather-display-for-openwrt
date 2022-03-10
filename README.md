@@ -200,9 +200,9 @@ system.@system[0].timezone='<Time Zone>'
   - temperature
   - precipitation
   - weather
-  - moon phase
-
-### Test
+  - moon phases (WIP)
+  <img src="/sample_screenshots/KindleStation-graph3.png" height="360" alt="Kindle 3 Screenshot" />
+ ### Test
 ```
 # ./kindle-weather.sh settings_Mcmurdo-Station.json
 # cd /tmp
