@@ -608,7 +608,7 @@ class DrawGraph:
                 elif label == True and label_adjust == False:
                     svg += SVGtext("middle", "16px", _x, (y - 15), "{}".format(jour)).svg()
 
-        _points = points + "{},{} {},{}".format(_x, (y - 35), (x + 10), (y - 35))
+        _points = points + "{},{} {},{}".format(_x, (y - 35), (x + 25), (y - 35))
         style2 = "fill:{};stroke:{};stroke-width:{}px;stroke-linecap:{};".format(fill, fill, "0", stroke_linecap)
         svg += SVGpolyline(_points, style2).svg()
         style = "fill:none;stroke:{};stroke-width:{}px;stroke-linecap:{};".format(stroke_color, stroke, stroke_linecap)
