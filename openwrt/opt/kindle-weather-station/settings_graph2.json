@@ -28,6 +28,7 @@
                          {"name": "precipitation",
                           "start": 0, "end": 8, "step": 1, "basis": "day",
                           "type": "bar", "stroke": 15,
+                          "axis-color": "rgb(0,0,0)",
                           "stroke-color": "rgb(105,105,105)",
                           "fill": "rgb(245,245,245)",
                           "stroke-linecap": "butt",

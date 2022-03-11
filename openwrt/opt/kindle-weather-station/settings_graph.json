@@ -19,19 +19,18 @@
         "converter": "convert",
         "graph": "True",
         "graph_object": [{"name": "temperature",
-                          "start": 0, "end": 24, "step": 1, "basis": "hour",
+                          "start": 0, "end": 8, "step": 1, "basis": "day",
                           "type": "line", "stroke": 4,
                           "stroke-color": "rgb(105,105,105)",
                           "fill": "rgb(169,169,169)",
                           "stroke-linecap": "round",
                           "label": "True", "label_adjust": "True"},
-                         {"name": "precipitation",
-                          "start": 0, "end": 24, "step": 1, "basis": "hour",
-                          "type": "bar", "stroke": 15,
-                          "axis-color": "rgb(0,0,0)",
-                          "stroke-color": "rgb(105,105,105)",
-                          "fill": "rgb(245,245,245)",
-                          "stroke-linecap": "butt",
-                          "label": "False", "label_adjust": "False"}] 
+                         {"name": "moon phase",
+                          "start": 0, "end": 8, "step": 1, "basis": "day",
+                          "type": "tile", "stroke": 4,
+                          "stroke-color": "rgb(0,0,0)",
+                          "fill": "rgb(0,0,0)",
+                          "stroke-linecap": "round",
+                          "label": "False", "label_adjust": "False"}]
     }
 }

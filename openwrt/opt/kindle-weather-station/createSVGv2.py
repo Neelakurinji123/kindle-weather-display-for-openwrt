@@ -680,7 +680,7 @@ class DrawGraph:
 
                 if l_max == hourly[10] and l_max != 0:
                     svg += SVGtext("middle", "16px", _x, (_y - 5), "max:{}".format(round(hourly[10],2))).svg()
-                    style2 = "fill:{};stroke:{};stroke-linecap:{};stroke-width:{}px;".format("rgb(0,0,0)", "rgb(0,0,0)", stroke_linecap, "1")
+                    style2 = "fill:{};stroke:{};stroke-linecap:{};stroke-width:{}px;".format(axis_color, axis_color, stroke_linecap, "1")
                     svg += SVGline(_x, _x, _y, (_y - 3), style2).svg()
                 if int(heure) % 3 == 0:
                     if label == True and label_adjust == True:
@@ -715,7 +715,7 @@ class DrawGraph:
 
                 if l_max == daily[10] and l_max != 0:
                     svg += SVGtext("middle", "16px", _x, (_y - 5), "max:{}".format(round(daily[10],2))).svg()
-                    style2 = "fill:{};stroke:{};stroke-linecap:{};stroke-width:{}px;".format("rgb(0,0,0)", "rgb(0,0,0)", stroke_linecap, "1")
+                    style2 = "fill:{};stroke:{};stroke-linecap:{};stroke-width:{}px;".format(axis_color, axis_color, stroke_linecap, "1")
                     svg += SVGline(_x, _x, _y, (_y - 3), style2).svg()
 
                 if label == True and label_adjust == True:
@@ -823,20 +823,6 @@ class DrawGraph:
                         r3 = 1 * ( r - 2)
                         d = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 1 {} {}z".format(px1, py1, r1, r1, px2, py2, r2, r3, px1, py1)
                         icons += SVGpath(d, style).svg()
-
-                        #px1 = math.cos(rad) * r + (_x - 3)
-                        #py1 = math.sin(rad) * r + (_y - 53)
-                        #px2 = math.cos(rad) * r + (_x - 3)
-                        #py2 = -math.sin(rad) * r + (_y - 53)
-
-                        ##r2 = 5 * r  # test
-                        #r1 = 1 * r
-                        #r2 = ((1 + math.sin(rad)) / math.cos(rad) if math.cos(rad) != 0 else math.inf) * r / 2   # 1 - infinity
-                        # d = "M{} {} A{} {} 0 0 1 {} {} {} {} 0 0 1 {} {}z".format(px1, py1, r1, r1, px2, py2, r2, r2, px1, py1)
-
-                        #r1 = 1 * r
-                        #d = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 0 {} {}z".format(px1, py1, r1, r1, px2, py2, r2, r2, px1, py1)
-                        #icons += SVGpath(d, style).svg()
 
                     elif pi > rad >= pi / 2:
                         px1 = math.cos(pi * 0.5 - rad * 0.025 * math.sin(rad)) * r + (_x - 3)
