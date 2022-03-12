@@ -801,123 +801,110 @@ class DrawGraph:
                 _y = y - 45
                 r =14
 
-                # 360d = 2pi(rad)
-                pi = math.pi
-                rad = daily[20] * pi * 2
-
                 # icon
                 style = "fill:{};stroke:{};stroke-width:{}px;".format(fill, stroke_color, 1)
                 icons += SVGcircle((_x - 3), (_y - 53), (r + 2), stroke_color, stroke, "none").svg()
 
+                # moon phase
+                # 360d = 2pi(rad)
                 #lat = -1  # test
+                pi = math.pi
+                rad = daily[20] * pi * 2  # One call API: 0,1=new moon, 0.25=1st qurater moon, 0.5=full moon, 0.75=lst quarter moon 
+                c = 0.02
+                #m = rad * c * math.sin(rad)
+                m = rad * c * math.cos(rad)
+                rx = _x - 3
+                ry = _y - 53
+                rp = r + 1
+                ra1 = 1 * rp
+                ra2 = (math.cos(rad) * rp)
+                ra3 = 1 * rp
+
+                def phase(rad):
+                    if (2 * pi / 60) > rad >= 0 or (2 * pi / 30) > (pi * 2 - rad) >= 0:
+                        res = 'n'
+                    elif (2 * pi / 60) > abs(rad - pi * 0.5) >= 0:
+                        res = '1q'
+                    elif (2 * pi / 60) > abs(rad - pi) >= 0:
+                        res = 'f'
+                    elif (2 * pi / 60) > abs(rad - pi * 1.5) >= 0:
+                        res = '3q'
+                    else:
+                        res = ""
+
+                    return res
 
                 if lat >= 0:
-                    if rad < pi / 2:
-                        px1 = math.cos(pi / 2 + rad * 0.025 * math.sin(rad)) * r + (_x - 3)
-                        py1 = math.sin(pi / 2 + rad * 0.025 * math.sin(rad)) * r + (_y - 53)
-                        px2 = math.cos(pi / 2 + rad * 0.025 * math.sin(rad)) * r + (_x - 3)
-                        py2 = -math.sin(pi / 2 + rad * 0.025 * math.sin(rad)) * r + (_y - 53)
-
-                        r1 = 1 * r
-                        r2 = (math.cos(rad) * (r - 2))
-                        r3 = 1 * ( r - 2)
-                        d = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 1 {} {}z".format(px1, py1, r1, r1, px2, py2, r2, r3, px1, py1)
-                        icons += SVGpath(d, style).svg()
-
-                    elif pi > rad >= pi / 2:
-                        px1 = math.cos(pi * 0.5 - rad * 0.025 * math.sin(rad)) * r + (_x - 3)
-                        py1 = math.sin(pi * 0.5 - rad * 0.025 * math.sin(rad)) * r + (_y - 53)
-                        px2 = math.cos(pi * 0.5 - rad * 0.025 * math.sin(rad)) * r + (_x - 3)
-                        py2 = -math.sin(pi * 0.5 - rad * 0.025 * math.sin(rad)) * r + (_y - 53)
-
-                        r1 = 1 * r
-                        r2 = (math.cos(rad) * (r - 2))
-                        r3 = 1 * ( r - 2)
-                        d = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 0 {} {}z".format(px1, py1, r1, r1, px2, py2, r2, r3, px1, py1)
-                        icons += SVGpath(d, style).svg()
-
+                    if rad < pi * 0.5:
+                        px1 = math.cos(pi * 0.5 + m) * rp + rx
+                        py1 = math.sin(pi * 0.5 + m) * rp + ry
+                        px2 = math.cos(pi * 0.5 + m) * rp + rx
+                        py2 = -math.sin(pi * 0.5 + m) * rp + ry
+                        d = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 1 {} {}z".format(px1, py1, ra1, ra1, px2, py2, ra2, ra3, px1, py1)
+                        ps = phase(rad)
+                    elif pi > rad >= pi * 0.5:
+                        px1 = math.cos(pi * 0.5 + m) * rp + rx
+                        py1 = math.sin(pi * 0.5 + m) * rp + ry
+                        px2 = math.cos(pi * 0.5 + m) * rp + rx
+                        py2 = -math.sin(pi * 0.5 + m) * rp + ry
+                        d = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 0 {} {}z".format(px1, py1, ra1, ra1, px2, py2, ra2, ra3, px1, py1)
+                        ps = phase(rad)
                     elif pi * 1.5 > rad >= pi:
-                        px1 = math.cos(pi * 0.5 - rad * 0.025 * math.sin(rad)) * r + (_x - 3)
-                        py1 = math.sin(pi * 0.5 - rad * 0.025 * math.sin(rad)) * r + (_y - 53)
-                        px2 = math.cos(pi * 0.5 - rad * 0.025 * math.sin(rad)) * r + (_x - 3)
-                        py2 = -math.sin(pi * 0.5 - rad * 0.025 * math.sin(rad)) * r + (_y - 53)
-
-                        r1 = 1 * r
-                        r2 = (math.cos(rad) * (r - 2))
-                        r3 = 1 * ( r - 2)
-                        d = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 0 {} {}z".format(px1, py1, r1, r1, px2, py2, r2, r3, px1, py1)
-                        icons += SVGpath(d, style).svg()
-
+                        px1 = math.cos(pi * 1.5 + m) * rp + rx
+                        py1 = math.sin(pi * 1.5 + m) * rp + ry
+                        px2 = math.cos(pi * 1.5 + m) * rp + rx
+                        py2 = -math.sin(pi * 1.5 + m) * rp + ry
+                        d = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 0 {} {}z".format(px1, py1, ra1, ra1, px2, py2, ra2, ra3, px1, py1)
+                        ps = phase(rad)
                     else:
-                        px1 = math.cos(pi * 0.5 + rad * 0.025 * math.sin(rad)) * r + (_x - 3)
-                        py1 = math.sin(pi * 0.5 + rad * 0.025 * math.sin(rad)) * r + (_y - 53)
-                        px2 = math.cos(pi * 0.5 + rad * 0.025 * math.sin(rad)) * r + (_x - 3)
-                        py2 = -math.sin(pi * 0.5 + rad * 0.025 * math.sin(rad)) * r + (_y - 53)
-
-                        r1 = 1 * r
-                        r2 = (math.cos(rad) * (r - 2))
-                        r3 = 1 * ( r - 2)
-                        d = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 0 {} {}z".format(px1, py1, r1, r1, px2, py2, r2, r3, px1, py1) # base
-                        icons += SVGpath(d, style).svg()
-
+                        px1 = math.cos(pi * 1.5 + m) * rp + rx
+                        py1 = math.sin(pi * 1.5 + m) * rp + ry
+                        px2 = math.cos(pi * 1.5 + m) * rp + rx
+                        py2 = -math.sin(pi * 1.5 + m) * rp + ry
+                        d = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 0 {} {}z".format(px1, py1, ra1, ra1, px2, py2, ra2, ra3, px1, py1)
+                        ps = phase(rad)
                 else:
-                    if rad < pi / 2:
-                        px1 = math.cos(pi * 1.5 - rad * 0.025 * math.sin(rad)) * r + (_x - 3)
-                        py1 = math.sin(pi * 1.5 - rad * 0.025 * math.sin(rad)) * r + (_y - 53)
-                        px2 = math.cos(pi * 1.5 - rad * 0.025 * math.sin(rad)) * r + (_x - 3)
-                        py2 = -math.sin(pi * 1.5 - rad * 0.025 * math.sin(rad)) * r + (_y - 53)
-
-                        r1 = 1 * r
-                        r2 = (math.cos(rad) * (r - 2))
-                        r3 = 1 * ( r - 2)
-                        d = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 1 {} {}z".format(px1, py1, r1, r1, px2, py2, r2, r3, px1, py1)
-                        icons += SVGpath(d, style).svg()
-
-                    elif pi > rad >= pi / 2:
-                        px1 = math.cos(pi * 1.5 + rad * 0.025 * math.sin(rad)) * r + (_x - 3)
-                        py1 = math.sin(pi * 1.5 + rad * 0.025 * math.sin(rad)) * r + (_y - 53)
-                        px2 = math.cos(pi * 1.5 + rad * 0.025 * math.sin(rad)) * r + (_x - 3)
-                        py2 = -math.sin(pi * 1.5 + rad * 0.025 * math.sin(rad)) * r + (_y - 53)
-
-                        r1 = 1 * r
-                        r2 = (math.cos(rad) * (r - 2))
-                        r3 = 1 * ( r - 2)
-                        d = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 0 {} {}z".format(px1, py1, r1, r1, px2, py2, r2, r3, px1, py1)
-                        icons += SVGpath(d, style).svg()
-
+                    if rad < pi * 0.5:
+                        px1 = math.cos(pi * 1.5 + m) * rp + rx
+                        py1 = math.sin(pi * 1.5 + m) * rp + ry
+                        px2 = math.cos(pi * 1.5 + m) * rp + rx
+                        py2 = -math.sin(pi * 1.5 + m) * rp +ry
+                        d = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 1 {} {}z".format(px1, py1, ra1, ra1, px2, py2, ra2, ra3, px1, py1)
+                        ps = phase(rad)
+                    elif pi > rad >= pi * 0.5:
+                        px1 = math.cos(pi * 1.5 + m) * rp + rx
+                        py1 = math.sin(pi * 1.5 + m) * rp + ry
+                        px2 = math.cos(pi * 1.5 + m) * rp + rx
+                        py2 = -math.sin(pi * 1.5 + m) * rp + ry
+                        d = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 0 {} {}z".format(px1, py1, ra1, ra1, px2, py2, ra2, ra3, px1, py1)
+                        ps = phase(rad)
                     elif pi * 1.5 > rad >= pi:
-                        px1 = math.cos(pi * 1.5 + rad * 0.025 * math.sin(rad)) * r + (_x - 3)
-                        py1 = math.sin(pi * 1.5 + rad * 0.025 * math.sin(rad)) * r + (_y - 53)
-                        px2 = math.cos(pi * 1.5 + rad * 0.025 * math.sin(rad)) * r + (_x - 3)
-                        py2 = -math.sin(pi * 1.5 + rad * 0.025 * math.sin(rad)) * r + (_y - 53)
-
-                        r1 = 1 * r
-                        r2 = (math.cos(rad) * (r - 2))
-                        r3 = 1 * ( r - 2)
-                        d = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 0 {} {}z".format(px1, py1, r1, r1, px2, py2, r2, r3, px1, py1)
-                        icons += SVGpath(d, style).svg()
-
+                        px1 = math.cos(pi * 1.5 + m) * rp + rx
+                        py1 = -math.sin(pi * 1.5 + m) * rp + ry
+                        px2 = math.cos(pi * 1.5 + m) * rp + rx
+                        py2 = math.sin(pi * 1.5 + m) * rp + ry
+                        d = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 0 {} {}z".format(px1, py1, ra1, ra1, px2, py2, ra2, ra3, px1, py1)
+                        ps = phase(rad)
                     else:
-                        px1 = math.cos(pi * 1.5 - rad * 0.025 * math.sin(rad)) * r + (_x - 3)
-                        py1 = math.sin(pi * 1.5 - rad * 0.025 * math.sin(rad)) * r + (_y - 53)
-                        px2 = math.cos(pi * 1.5 - rad * 0.025 * math.sin(rad)) * r + (_x - 3)
-                        py2 = -math.sin(pi * 1.5 - rad * 0.025 * math.sin(rad)) * r + (_y - 53)
+                        px1 = math.cos(pi * 1.5 + m) * rp + rx
+                        py1 = math.sin(pi * 1.5 + m) * rp + ry
+                        px2 = math.cos(pi * 1.5 + m) * rp + rx
+                        py2 = -math.sin(pi * 1.5 + m) * rp + ry
+                        d = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 0 {} {}z".format(px1, py1, ra1, ra1, px2, py2, ra2, ra3, px1, py1)
+                        ps = phase(rad)
 
-                        r1 = 1 * r
-                        r2 = (math.cos(rad) * (r - 2))
-                        r3 = 1 * ( r - 2)
-                        d = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 0 {} {}z".format(px1, py1, r1, r1, px2, py2, r2, r3, px1, py1) # base
-                        icons += SVGpath(d, style).svg()
+                icons += SVGpath(d, style).svg()
 
                 # moon rise and moon set
-                # t_moonrise = str(daily[20])  # test
-                t_moonrise = str(datetime.fromtimestamp(daily[18], tz).strftime("%H:%M"))
+                t_moonrise = str(daily[20])  # test
+                #t_moonrise = str(datetime.fromtimestamp(daily[18], tz).strftime("%H:%M"))
                 t_moonset = str(datetime.fromtimestamp(daily[19], tz).strftime("%H:%M"))
 
                 svg += SVGtext("start", "16px", (_x - 32), (_y - 10), "r:").svg()
                 svg += SVGtext("end", "16px", (_x + 26), (_y - 10), "{}".format(t_moonrise)).svg()
                 svg += SVGtext("start", "16px", (_x - 32), (_y + 7), "s:").svg()
                 svg += SVGtext("end", "16px", (_x + 26), (_y + 7), "{}".format(t_moonset)).svg()
+                svg += SVGtext("start", "16px", (_x - 32), (_y - 67), "{}".format(ps)).svg()
 
                 if n < (end - 1):
                     style = "fill:none;stroke:{};stroke-linecap:{};stroke-width:{}px;".format(grid_y_color, stroke_linecap, grid_y)
