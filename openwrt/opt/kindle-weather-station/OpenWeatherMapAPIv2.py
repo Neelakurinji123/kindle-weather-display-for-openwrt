@@ -86,10 +86,11 @@ class OpenWeatherMap:
 
         # Current data format
         # list - 0:time  1:id  2:weather  3:description  4:icon  5:temp  6:pressure  7:humidity  8:wind_speed  9:wind_direction  10:clouds
-        #        11:sunrise  12:sunsetb  13:gust  14:precipitation
+        #        11:sunrise  12:sunsetb  13:gust  14:precipitation  15:pop(1h)
         #
         c = self.onecall
         d = c['current']
+        h = c['hourly'][0]
 
         if not 'sunrise' in d:
             d['sunrise'] = 0
@@ -105,15 +106,15 @@ class OpenWeatherMap:
 
         # rain or snow past a hour
         precipitation = 0
-        if 'rain' in d['weather'][0]:
-            precipitation = float(d['rain'])
-        elif 'snow' in d['weather'][0]:
-            precipitation = float(d['snow'])
+        if 'rain' in h:
+            precipitation = float(h['rain']['1h'])
+        elif 'snow' in h:
+            precipitation = float(h['snow']['1h'])
 
         dat = [int(d['dt']), int(d['weather'][0]['id']), str(d['weather'][0]['main']), str(d['weather'][0]['description']), \
                   str(d['weather'][0]['icon']), float(d['temp']), int(d['pressure']), int(d['humidity']), float(d['wind_speed']), \
                   self.cardinal(d['wind_deg']), float(d['clouds']), int(d['sunrise']), int(d['sunset']), \
-                  gust, precipitation]
+                  gust, precipitation, h['pop']]
 
         # fix icon
         p = {'id': dat[1], 'weather': dat[2], 'description': dat[3], 'icon': dat[4]}

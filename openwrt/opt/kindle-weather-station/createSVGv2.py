@@ -143,7 +143,8 @@ class CurrentWeather:
         if (curt_weather[2] == 'Rain' or curt_weather[2] == 'Drizzle' or
                 curt_weather[2] == 'Snow' or curt_weather[2] == 'Sleet' or curt_weather[2] == 'Clouds'):
 
-            r = Decimal(curt_weather[14]).quantize(Decimal('0.1'), rounding=ROUND_HALF_EVEN)
+#            r = Decimal(curt_weather[14]).quantize(Decimal('0.1'), rounding=ROUND_HALF_EVEN)
+            r = Decimal(curt_weather[15]).quantize(Decimal('0.1'), rounding=ROUND_HALF_EVEN)
 
             if r == 0:
                 svg_text += SVGtext("end", "45px", (x + 200 - int(s_padding(r) * 0.64)), (y + 135), "n/a").svg()
@@ -321,15 +322,16 @@ class CurrentWeatherAlerts(CurrentWeather):
 
     def icon(self):
         p = self.p
+        svg_icon = str()
         curt_weather = p.current_weather()
         self.base_x = -5
         self.base_y = 45
-        svg_icon = super(CurrentWeatherAlerts, self).add_curt_weather_icon()
+        svg_icon += super(CurrentWeatherAlerts, self).add_curt_weather_icon()
 
         if int(curt_weather[8]) != 0:
             self.base_x = 450
             self.base_y = -125
-            svg_icon = super(CurrentWeatherAlerts, self).add_curt_weather_wind_icon()
+            svg_icon += super(CurrentWeatherAlerts, self).add_curt_weather_wind_icon()
 
         return svg_icon
 
@@ -362,7 +364,6 @@ class HourlyWeather:
         # 3h forecast
         for i in range(h_hour, h_range, h_step):
             hourly = p.hourly_forecast(i)
-            jour = datetime.fromtimestamp(hourly[0], tz)
 
             hrs = {3: "three hours later", 6: "six hours later", 9: "nine hours later"}
 
@@ -584,6 +585,7 @@ class DrawGraph:
                 _x = x + 10 + int((w - 22) / (end - start - 1)) * n
                 _y = y - (hourly[5] - t_min) * t_step - 45
                 points += "{},{} ".format(_x, _y)
+                points2 = points + "{},{} {},{}".format(_x, (y - 35), (x + 10), (y - 35))
 
                 if int(heure) % 3 == 0:
                     svg += SVGtext("end", "16px", (_x + 14), (_y - 9), "{} {}".format(round(int(hourly[5])), p.unit['temp'])).svg()
@@ -600,6 +602,7 @@ class DrawGraph:
                 _x = x + 25 + int((w - 50)  / (end - start - 1)) * n
                 _y = y - (daily[5] - t_min) * t_step - 45
                 points += "{},{} ".format(_x, _y)
+                points2 = points + "{},{} {},{}".format(_x, (y - 35), (x + 25), (y - 35))
                 svg += SVGtext("end", "16px", (_x + 14), (_y - 9), "{} {}".format(int(daily[5]), p.unit['temp'])).svg()
                 svg += SVGcircle((_x + 3), (_y - 20), 2, "black", 1, "none").svg()
 
@@ -608,9 +611,8 @@ class DrawGraph:
                 elif label == True and label_adjust == False:
                     svg += SVGtext("middle", "16px", _x, (y - 15), "{}".format(jour)).svg()
 
-        _points = points + "{},{} {},{}".format(_x, (y - 35), (x + 25), (y - 35))
         style2 = "fill:{};stroke:{};stroke-width:{}px;stroke-linecap:{};".format(fill, fill, "0", stroke_linecap)
-        svg += SVGpolyline(_points, style2).svg()
+        svg += SVGpolyline(points2, style2).svg()
         style = "fill:none;stroke:{};stroke-width:{}px;stroke-linecap:{};".format(stroke_color, stroke, stroke_linecap)
         svg += SVGpolyline(points, style).svg()
 
@@ -805,17 +807,17 @@ class DrawGraph:
                 style = "fill:{};stroke:{};stroke-width:{}px;".format(fill, stroke_color, 1)
                 icons += SVGcircle((_x - 3), (_y - 53), (r + 2), stroke_color, stroke, "none").svg()
 
-                # moon phase
-                # 360d = 2pi(rad)
+                # moon phase:  360d = 2pi(rad)
                 #lat = -1  # test
                 pi = math.pi
                 rad = daily[20] * pi * 2  # One call API: 0,1=new moon, 0.25=1st qurater moon, 0.5=full moon, 0.75=lst quarter moon 
-                c = 0.02
+                c = 0.025
                 #m = rad * c * math.sin(rad)
                 m = rad * c * math.cos(rad)
                 rx = _x - 3
                 ry = _y - 53
-                rp = r + 1
+                rp = r + 2
+                #rp = r - 2 # test
                 ra1 = 1 * rp
                 ra2 = (math.cos(rad) * rp)
                 ra3 = 1 * rp
@@ -824,11 +826,11 @@ class DrawGraph:
                     if (2 * pi / 60) > rad >= 0 or (2 * pi / 30) > (pi * 2 - rad) >= 0:
                         res = 'n'
                     elif (2 * pi / 60) > abs(rad - pi * 0.5) >= 0:
-                        res = '1q'
+                        res = '1'
                     elif (2 * pi / 60) > abs(rad - pi) >= 0:
                         res = 'f'
                     elif (2 * pi / 60) > abs(rad - pi * 1.5) >= 0:
-                        res = '3q'
+                        res = '3'
                     else:
                         res = ""
 
@@ -836,10 +838,10 @@ class DrawGraph:
 
                 if lat >= 0:
                     if rad < pi * 0.5:
-                        px1 = math.cos(pi * 0.5 + m) * rp + rx
-                        py1 = math.sin(pi * 0.5 + m) * rp + ry
-                        px2 = math.cos(pi * 0.5 + m) * rp + rx
-                        py2 = -math.sin(pi * 0.5 + m) * rp + ry
+                        px1 = math.cos(pi * 0.5 - m) * rp + rx
+                        py1 = math.sin(pi * 0.5 - m) * rp + ry
+                        px2 = math.cos(pi * 0.5 - m) * rp + rx
+                        py2 = -math.sin(pi * 0.5 - m) * rp + ry
                         d = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 1 {} {}z".format(px1, py1, ra1, ra1, px2, py2, ra2, ra3, px1, py1)
                         ps = phase(rad)
                     elif pi > rad >= pi * 0.5:
@@ -857,18 +859,18 @@ class DrawGraph:
                         d = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 0 {} {}z".format(px1, py1, ra1, ra1, px2, py2, ra2, ra3, px1, py1)
                         ps = phase(rad)
                     else:
-                        px1 = math.cos(pi * 1.5 + m) * rp + rx
-                        py1 = math.sin(pi * 1.5 + m) * rp + ry
-                        px2 = math.cos(pi * 1.5 + m) * rp + rx
-                        py2 = -math.sin(pi * 1.5 + m) * rp + ry
-                        d = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 0 {} {}z".format(px1, py1, ra1, ra1, px2, py2, ra2, ra3, px1, py1)
+                        px1 = math.cos(pi * 1.5 - m) * rp + rx
+                        py1 = math.sin(pi * 1.5 - m) * rp + ry
+                        px2 = math.cos(pi * 1.5 - m) * rp + rx
+                        py2 = -math.sin(pi * 1.5 - m) * rp + ry
+                        d = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 1 {} {}z".format(px1, py1, ra1, ra1, px2, py2, ra2, ra3, px1, py1)
                         ps = phase(rad)
                 else:
                     if rad < pi * 0.5:
-                        px1 = math.cos(pi * 1.5 + m) * rp + rx
-                        py1 = math.sin(pi * 1.5 + m) * rp + ry
-                        px2 = math.cos(pi * 1.5 + m) * rp + rx
-                        py2 = -math.sin(pi * 1.5 + m) * rp +ry
+                        px1 = math.cos(pi * 1.5 - m) * rp + rx
+                        py1 = math.sin(pi * 1.5 - m) * rp + ry
+                        px2 = math.cos(pi * 1.5 - m) * rp + rx
+                        py2 = -math.sin(pi * 1.5 - m) * rp +ry
                         d = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 1 {} {}z".format(px1, py1, ra1, ra1, px2, py2, ra2, ra3, px1, py1)
                         ps = phase(rad)
                     elif pi > rad >= pi * 0.5:
@@ -879,32 +881,35 @@ class DrawGraph:
                         d = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 0 {} {}z".format(px1, py1, ra1, ra1, px2, py2, ra2, ra3, px1, py1)
                         ps = phase(rad)
                     elif pi * 1.5 > rad >= pi:
-                        px1 = math.cos(pi * 1.5 + m) * rp + rx
-                        py1 = -math.sin(pi * 1.5 + m) * rp + ry
-                        px2 = math.cos(pi * 1.5 + m) * rp + rx
-                        py2 = math.sin(pi * 1.5 + m) * rp + ry
+                        px1 = math.cos(pi * 0.5 + m) * rp + rx
+                        py1 = math.sin(pi * 0.5 + m) * rp + ry
+                        px2 = math.cos(pi * 0.5 + m) * rp + rx
+                        py2 = -math.sin(pi * 0.5 + m) * rp + ry
                         d = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 0 {} {}z".format(px1, py1, ra1, ra1, px2, py2, ra2, ra3, px1, py1)
                         ps = phase(rad)
                     else:
-                        px1 = math.cos(pi * 1.5 + m) * rp + rx
-                        py1 = math.sin(pi * 1.5 + m) * rp + ry
-                        px2 = math.cos(pi * 1.5 + m) * rp + rx
-                        py2 = -math.sin(pi * 1.5 + m) * rp + ry
-                        d = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 0 {} {}z".format(px1, py1, ra1, ra1, px2, py2, ra2, ra3, px1, py1)
+                        px1 = math.cos(pi * 0.5 - m) * rp + rx
+                        py1 = math.sin(pi * 0.5 - m) * rp + ry
+                        px2 = math.cos(pi * 0.5 - m) * rp + rx
+                        py2 = -math.sin(pi * 0.5 - m) * rp + ry
+                        d = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 1 {} {}z".format(px1, py1, ra1, ra1, px2, py2, ra2, ra3, px1, py1)
                         ps = phase(rad)
 
-                icons += SVGpath(d, style).svg()
+                icons += SVGpath(d, style).svg() if ps != 'f' else ''
 
                 # moon rise and moon set
-                t_moonrise = str(daily[20])  # test
+                #t_moonrise = str(daily[20])  # test
                 #t_moonrise = str(datetime.fromtimestamp(daily[18], tz).strftime("%H:%M"))
-                t_moonset = str(datetime.fromtimestamp(daily[19], tz).strftime("%H:%M"))
+                #t_moonset = str(datetime.fromtimestamp(daily[19], tz).strftime("%H:%M"))
+                #print(tz, t_moonrise, t_moonset, daily[18]) # test
+                t_moonrise = "00:00" if daily[18] == 0 else str(datetime.fromtimestamp(daily[18], tz).strftime("%H:%M"))
+                t_moonset = "00:00" if daily[19] == 0 else str(datetime.fromtimestamp(daily[19], tz).strftime("%H:%M"))
 
                 svg += SVGtext("start", "16px", (_x - 32), (_y - 10), "r:").svg()
                 svg += SVGtext("end", "16px", (_x + 26), (_y - 10), "{}".format(t_moonrise)).svg()
                 svg += SVGtext("start", "16px", (_x - 32), (_y + 7), "s:").svg()
                 svg += SVGtext("end", "16px", (_x + 26), (_y + 7), "{}".format(t_moonset)).svg()
-                svg += SVGtext("start", "16px", (_x - 32), (_y - 67), "{}".format(ps)).svg()
+                svg += SVGtext("start", "16px", (_x - 32), (_y - 68), "{}".format(ps)).svg()
 
                 if n < (end - 1):
                     style = "fill:none;stroke:{};stroke-linecap:{};stroke-width:{}px;".format(grid_y_color, stroke_linecap, grid_y)
@@ -1085,57 +1090,78 @@ def create_svg(p, t_now, tz, utc, svgfile, pngfile):
 
     f_svg = open(svgfile,"w", encoding=p.encoding)
 
-    _header = Header(p=p)
-    svg_header += _header.text()
+    header = Header(p=p)
+    svg_header += header.text()
 
-    _maintenant = Maintenant(p=p, base_x=0, base_y=0)
-    svg_text += _maintenant.text()
-    svg_draw += _maintenant.icon()
+    maintenant = Maintenant(p=p, base_x=0, base_y=0)
+    svg_text += maintenant.text()
+    svg_draw += maintenant.icon()
 
-    # Current weather area (base_x= ,base_y=40)
-    base_x = 5
-    base_y = 40
-    disc_offset = 35
-    wordwrap = 20
+    if p.graph == True and len(p.graph_object) > 2:
 
-    _current = CurrentWeatherNoAlerts(p=p, base_x=base_x, base_y=base_y, disc_offset=disc_offset, wordwrap=wordwrap)
-    svg_text += _current.text()
-    svg_draw += _current.icon()
+        # Current weather
+        base_x = -5
+        base_y = 45
+        disc_offset = 0
+        wordwrap = 0
+        current = CurrentWeatherAlerts(p=p, base_x=base_x, base_y=base_y, disc_offset=disc_offset, wordwrap=wordwrap)
+        svg_text += current.text()
+        svg_draw += current.icon()
 
-    # Hourly weather document area (base_x= ,base_y=40)
-    base_x = 370
-    base_y = 40
-    h_hour = 3
-    h_range = 12
-    h_step = 3
-    pitch = 155
-
-    _hourly = HourlyWeather(p, base_x=base_x, base_y=base_y, h_hour=h_hour, h_range=h_range, h_step=h_step, pitch=pitch)
-    svg_text += _hourly.text()
-    svg_draw += _hourly.icon()
-
-    # Daily weather document area (base_x=0 ,base_y=)
-    base_x = 0
-    base_y = 500
-    d_range = 4
-    pitch = 90
-
-
-    # area x=0,600 y=520,800(520+140+140)
-    base_x = 40
-    base_y = 660
-
-    if p.graph == True:
+        # Graph area x=0,600 y=240,800(240+140+140+140+140)
+        base_x = 40
+        #base_y = 380
+        base_y = 420
         canvas = {"width": 530, "height": 140, "bgcolor": "rgb(220,220,220)", "axis": 0, \
                       "axis_color": "rgb(0,0,0)", "grid": 3, "grid_color": "rgb(255,255,255)"}
 
         for obj in p.graph_object:
             svg_draw += DrawGraph(p=p, base_x=base_x, base_y=base_y, canvas=canvas, object=obj).draw()
-            base_y += 140
+            base_y += 130
+
     else:
-        _daily= DailyWeather(p=p, base_x=base_x, base_y=base_y, d_range=d_range, pitch=pitch)
-        svg_text += _daily.text()
-        svg_draw += _daily.icon()
+       # Current weather
+        base_x = 5
+        base_y = 40
+        disc_offset = 35
+        wordwrap = 20
+
+        current = CurrentWeatherNoAlerts(p=p, base_x=base_x, base_y=base_y, disc_offset=disc_offset, wordwrap=wordwrap)
+        svg_text += current.text()
+        svg_draw += current.icon()
+
+        # Hourly weather
+        base_x = 370
+        base_y = 40
+        h_hour = 3
+        h_range = 12
+        h_step = 3
+        pitch = 155
+
+        hourly = HourlyWeather(p, base_x=base_x, base_y=base_y, h_hour=h_hour, h_range=h_range, h_step=h_step, pitch=pitch)
+        svg_text += hourly.text()
+        svg_draw += hourly.icon()
+
+        # Daily weather
+
+        # area x=0,600 y=520,800(520+140+140)
+        if p.graph == True and len(p.graph_object) <= 2:
+            base_x = 40
+            base_y = 660
+            canvas = {"width": 530, "height": 140, "bgcolor": "rgb(220,220,220)", "axis": 0, \
+                          "axis_color": "rgb(0,0,0)", "grid": 3, "grid_color": "rgb(255,255,255)"}
+
+            for obj in p.graph_object:
+                svg_draw += DrawGraph(p=p, base_x=base_x, base_y=base_y, canvas=canvas, object=obj).draw()
+                base_y += 140
+        else:
+            base_x = 0
+            base_y = 500
+            d_range = 4
+            pitch = 90
+            daily= DailyWeather(p=p, base_x=base_x, base_y=base_y, d_range=d_range, pitch=pitch)
+            svg_text += daily.text()
+            svg_draw += daily.icon()
 
     svg_text += '</g>\n'
     svg_footer += '</svg>' 
@@ -1151,27 +1177,27 @@ def create_alerts_svg(p, t_now, tz, utc, svgfile, pngfile):
 
     f_svg = open(svgfile,"w", encoding=p.encoding)
 
-    _header = Header(p=p)
-    svg_header += _header.text()
+    header = Header(p=p)
+    svg_header += header.text()
 
-    _maintenant = Maintenant(p=p, base_x=0, base_y=0)
-    svg_text += _maintenant.text()
-    svg_draw += _maintenant.icon()
+    maintenant = Maintenant(p=p, base_x=0, base_y=0)
+    svg_text += maintenant.text()
+    svg_draw += maintenant.icon()
 
-    # Current weather area
+    # Current weather
     base_x = -5
     base_y = 45
     disc_offset = 0
     wordwrap = 0
-    _current = CurrentWeatherAlerts(p=p, base_x=base_x, base_y=base_y, disc_offset=disc_offset, wordwrap=wordwrap)
-    svg_text += _current.text()
-    svg_draw += _current.icon()
+    current = CurrentWeatherAlerts(p=p, base_x=base_x, base_y=base_y, disc_offset=disc_offset, wordwrap=wordwrap)
+    svg_text += current.text()
+    svg_draw += current.icon()
 
     base_x = 0
     base_y = 340
     max_y = 800
-    _alerts =  Alerts(p, base_x, base_y, max_y)
-    svg_text += _alerts.text()
+    alerts =  Alerts(p, base_x, base_y, max_y)
+    svg_text += alerts.text()
 
     svg_text += '</g>\n'
     svg_footer += '</svg>'
