@@ -65,7 +65,7 @@ config zone
 	option output 'ACCEPT'
 	option forward 'ACCEPT'
 	list network 'lan'
-	list network 'br0'
+	list network 'br-lan'
 
 config zone
 	option name 'wan'
@@ -188,13 +188,6 @@ config rule
 config include
 	option path '/etc/firewall.user'
 
-config rule
-	option name 'Allow_LAN-RADIUS'
-	list proto 'udp'
-	option src 'lan'
-	option dest_port '1812'
-	option target 'ACCEPT'
-
 config zone
 	option name 'usb'
 	list network 'usb'
@@ -237,7 +230,7 @@ config nat
 	option target 'SNAT'
 	option name 'SNAT-NTP'
 	option src_ip '192.168.2.0/24'
-	option snat_ip '192.168.211.10'
+	option snat_ip '<router IP>'
 	option device 'br-lan'
 
 config nat
@@ -247,7 +240,7 @@ config nat
 	option target 'SNAT'
 	option src 'lan'
 	option src_ip '192.168.2.0/24'
-	option snat_ip '192.168.211.10'
+	option snat_ip '<router IP>'
 	option device 'br-lan'
 
 config nat
@@ -255,7 +248,7 @@ config nat
 	option target 'SNAT'
 	option src 'lan'
 	option src_ip '192.168.2.0/24'
-	option snat_ip '192.168.211.10'
+	option snat_ip '<router IP>'
 	option device 'br-lan'
 	list proto 'icmp'
 
