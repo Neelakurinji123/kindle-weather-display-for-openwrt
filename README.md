@@ -458,6 +458,10 @@ system.@system[0].timezone='<Time Zone>'
   - weather
   - moon phases
   
+  Edit config file: settings.json
+  ```
+  "graph": "True"  
+  ```
   <img src="/sample_screenshots/KindleStation_graph3.png" height="360" alt="Kindle 3 Screenshot" />
  ### Test
 ```
