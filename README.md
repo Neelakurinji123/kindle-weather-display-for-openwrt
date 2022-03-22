@@ -52,6 +52,7 @@ Create API key with the following options:
 - Setup `123/udp`, `53/udp` and `icmp` for snat
 
 ### /etc/config/firewall
+Edit IP address for SNAT
 ````
 config defaults
 	option synflood_protect '1'
