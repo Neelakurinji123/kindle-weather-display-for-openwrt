@@ -535,7 +535,7 @@ Edit crontab and restart cron
 # nano /etc/crontab/root
 
 2 * * * * sh -c "/mnt/us/kindle-weather/weather-script.sh"
-0 * * * * sh -c "/usr/bin/ntpdate 0.jp.pool.ntp.org"
+58 * * * * sh -c "/usr/bin/ntpdate 0.jp.pool.ntp.org"
 
 # /etc/init.d/cron stop
 # kill $(pidof crond)
