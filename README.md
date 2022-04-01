@@ -479,6 +479,32 @@ system.@system[0].timezone='<Time Zone>'
     }
 }    
 ```
+### settings.json
+| Name | Required | Type | Comment | Example |
+| ---- | ---- | ---- | ---- | ---- |
+| city | Any | string | City name | Tokorozawa |
+| timezone | Yes | string | local timezone in linux os formatting | Asia/Tokyo |
+| encoding | Yes | string | text encoding | iso-8859-1 |
+| locale | Yes | string | system locale |en_US.UTF-8 |
+| font | Yes | string | system font | Droid Sans |
+| sunrise_and_sunset | No | boolean | sunrinse and sunset time | True |
+| darkmode | No | boolean[^1] | dark mode and light mode | False |
+| service | Yes | string | OpenWeatherMap onecall API | onecall |
+| api_key | Yes | hex | OpenWeatherMap API key | 1234567890abcdef1234567890abcdef |
+| lat | Yes | float | latitude | 35.4761 |
+| lon | Yes | float | longitude | 139.2810 |
+| units | Yes | string | unit[^2] | metric |
+| lang | Yes | string | language for OpenWeatherMap | en |
+| exclude | No | string | exclude from API call | minutely |
+| alerts | No | boolean | weather alerts | True |
+| cloudconvert | No | boolean | use cloudconvert API | True |
+| converter | Yes | string | image converter | convert |
+| ramadhan | No | boolean | add ramadhan month | True |
+| graph | No | boolean | add graphs | False |
+
+[^1]: True, False or Auto
+[^2]: imperial or metric
+ 
  ### Test
 ```
 # ./kindle-weather.sh settings_Mcmurdo-Station.json
