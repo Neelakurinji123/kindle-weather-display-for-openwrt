@@ -482,7 +482,7 @@ system.@system[0].timezone='<Time Zone>'
 ### settings.json
 | Name | Required | Type | Comment | Example |
 | ---- | ---- | ---- | ---- | ---- |
-| city | Any | string | City name | Tokorozawa |
+| city | Any | string | city name | Tokorozawa |
 | timezone | Yes | string | local timezone in linux os formatting | Asia/Tokyo |
 | encoding | Yes | string | text encoding | iso-8859-1 |
 | locale | Yes | string | system locale |en_US.UTF-8 |
@@ -493,7 +493,7 @@ system.@system[0].timezone='<Time Zone>'
 | api_key | Yes | hex | OpenWeatherMap API key | 1234567890abcdef1234567890abcdef |
 | lat | Yes | float | latitude | 35.4761 |
 | lon | Yes | float | longitude | 139.2810 |
-| units | Yes | string | unit[^2] | metric |
+| units | Yes | string | unit system[^2] | metric |
 | lang | Yes | string | language for OpenWeatherMap | en |
 | exclude | No | string | exclude from API call | minutely |
 | alerts | No | boolean | weather alerts | True |
