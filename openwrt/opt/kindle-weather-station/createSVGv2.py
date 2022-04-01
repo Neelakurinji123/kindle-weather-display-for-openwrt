@@ -940,11 +940,11 @@ class DrawGraph:
                 svg += SVGtext("start", "16px", (_x - 32), (_y - 10), "r:").svg()
                 svg += SVGtext("end", "16px", (_x + 24), (_y - 10), "{}".format(t_moonrise)).svg()
                 svg += SVGtext("start", "16px", (_x - 32), (_y + 7), "s:").svg()
-                svg += SVGtext("end", "16px", (_x + 26), (_y + 7), "{}".format(t_moonset)).svg()
+                svg += SVGtext("end", "16px", (_x + 24), (_y + 7), "{}".format(t_moonset)).svg()
 
                 # moon phase and ramadhan 
                 svg += SVGtext("start", "16px", (_x - 32), (_y - 68), "{}".format(ps)).svg()
-                svg += SVGtext("end", "16px", (_x + 25), (_y - 68), "{}".format(ra)).svg()
+                svg += SVGtext("end", "16px", (_x + 24), (_y - 68), "{}".format(ra)).svg()
 
                 # grid
                 if n < (end - 1):
