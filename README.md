@@ -509,6 +509,10 @@ system.@system[0].timezone='<Time Zone>'
 ```
 # ./kindle-weather.sh settings_Mcmurdo-Station.json
 # cd /tmp
+# ls
+KindleStation.png
+KindleStation.svg
+KindleStation_flatten.png
 ```
 ### Setting up Kindle Weather Display server
 Copy kindle-weather-display-for-openwrt to OpenWrt
