@@ -505,15 +505,6 @@ system.@system[0].timezone='<Time Zone>'
 [^1]: True, False or Auto
 [^2]: imperial or metric
  
- ### Test
-```
-# ./kindle-weather.sh settings_Mcmurdo-Station.json
-# cd /tmp
-# ls
-KindleStation.png
-KindleStation.svg
-KindleStation_flatten.png
-```
 ### Setting up Kindle Weather Display server
 Copy kindle-weather-display-for-openwrt to OpenWrt
 ```
@@ -539,6 +530,16 @@ Edit crontab and restart cron
 ```
 
 `createSVGv2.py` runs at hourly intervals and creates these files: `KindleStation.svg`, `KindleStation.png` and `KindleStation_flatten.png`
+
+ ### Test
+```
+# ./kindle-weather.sh settings_Mcmurdo-Station.json
+# cd /tmp
+# ls
+KindleStation.png
+KindleStation.svg
+KindleStation_flatten.png
+```
 
 ## Setting up Kindle
 Copy kindle-weather-display-for-openwrt to Kindle
