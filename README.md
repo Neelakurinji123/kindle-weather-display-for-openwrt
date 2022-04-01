@@ -51,6 +51,261 @@ Create API key with the following options:
 - Network > Firewall - Traffic Rules: `22/tcp`, `123/udp`, `53/udp` and `icmp` set open both incoming and outgoing
 - Setup `123/udp`, `53/udp` and `icmp` for snat
 
+### /etc/config/firewall
+Edit IP address for SNAT
+````
+config defaults
+	option synflood_protect '1'
+	option input 'REJECT'
+	option forward 'REJECT'
+	option output 'REJECT'
+
+config zone
+	option name 'lan'
+	option input 'ACCEPT'
+	option output 'ACCEPT'
+	option forward 'ACCEPT'
+	list network 'lan'
+	list network 'br-lan'
+
+config zone
+	option name 'wan'
+	option input 'REJECT'
+	option output 'ACCEPT'
+	option forward 'REJECT'
+	option masq '1'
+	option mtu_fix '1'
+	list network 'wan'
+	list network 'wan6'
+
+config forwarding
+	option src 'lan'
+	option dest 'wan'
+
+config rule
+	option name 'Allow-DHCP-Renew'
+	option src 'wan'
+	option proto 'udp'
+	option dest_port '68'
+	option target 'ACCEPT'
+	option family 'ipv4'
+
+config rule
+	option name 'Allow-Ping'
+	option src 'wan'
+	option proto 'icmp'
+	option icmp_type 'echo-request'
+	option family 'ipv4'
+	option target 'ACCEPT'
+
+config rule
+	option name 'Allow-IGMP'
+	option src 'wan'
+	option proto 'igmp'
+	option family 'ipv4'
+	option target 'ACCEPT'
+
+config rule
+	option name 'Allow-DHCPv6'
+	option src 'wan'
+	option proto 'udp'
+	option src_ip 'fc00::/6'
+	option dest_ip 'fc00::/6'
+	option dest_port '546'
+	option family 'ipv6'
+	option target 'ACCEPT'
+
+config rule
+	option name 'Allow-MLD'
+	option src 'wan'
+	option proto 'icmp'
+	option src_ip 'fe80::/10'
+	list icmp_type '130/0'
+	list icmp_type '131/0'
+	list icmp_type '132/0'
+	list icmp_type '143/0'
+	option family 'ipv6'
+	option target 'ACCEPT'
+
+config rule
+	option name 'Allow-ICMPv6-Input'
+	option src 'wan'
+	option proto 'icmp'
+	list icmp_type 'echo-request'
+	list icmp_type 'echo-reply'
+	list icmp_type 'destination-unreachable'
+	list icmp_type 'packet-too-big'
+	list icmp_type 'time-exceeded'
+	list icmp_type 'bad-header'
+	list icmp_type 'unknown-header-type'
+	list icmp_type 'router-solicitation'
+	list icmp_type 'neighbour-solicitation'
+	list icmp_type 'router-advertisement'
+	list icmp_type 'neighbour-advertisement'
+	option limit '1000/sec'
+	option family 'ipv6'
+	option target 'ACCEPT'
+
+config rule
+	option name 'Allow-ICMPv6-Forward'
+	option src 'wan'
+	option dest '*'
+	option proto 'icmp'
+	list icmp_type 'echo-request'
+	list icmp_type 'echo-reply'
+	list icmp_type 'destination-unreachable'
+	list icmp_type 'packet-too-big'
+	list icmp_type 'time-exceeded'
+	list icmp_type 'bad-header'
+	list icmp_type 'unknown-header-type'
+	option limit '1000/sec'
+	option family 'ipv6'
+	option target 'ACCEPT'
+
+config rule
+	option name 'Allow-IPSec-ESP'
+	option src 'wan'
+	option dest 'lan'
+	option proto 'esp'
+	option target 'ACCEPT'
+
+config rule
+	option name 'Allow-ISAKMP'
+	option src 'wan'
+	option dest 'lan'
+	option dest_port '500'
+	option proto 'udp'
+	option target 'ACCEPT'
+
+config rule
+	option name 'Support-UDP-Traceroute'
+	option src 'wan'
+	option dest_port '33434:33689'
+	option proto 'udp'
+	option family 'ipv4'
+	option target 'REJECT'
+	option enabled '0'
+
+config include
+	option path '/etc/firewall.user'
+
+config zone
+	option name 'usb'
+	list network 'usb'
+	option forward 'REJECT'
+	option input 'REJECT'
+	option output 'REJECT'
+
+config rule
+	option name 'Allow-USB-ssh'
+	list proto 'tcp'
+	option src 'usb'
+	option dest_port '22'
+	option target 'ACCEPT'
+
+config rule
+	option name 'Allow-USB-NTP'
+	list proto 'udp'
+	option src 'usb'
+	option dest_port '123'
+	option target 'ACCEPT'
+
+config rule
+	option name 'Allow-USB-HTTP'
+	list proto 'tcp'
+	option src 'usb'
+	option dest_port '80'
+	option target 'ACCEPT'
+
+config rule
+	option name 'Allow-LAN-NTP'
+	list proto 'udp'
+	option src 'lan'
+	option dest_port '123'
+	option target 'ACCEPT'
+
+config nat
+	list proto 'udp'
+	option src 'lan'
+	option dest_port '123'
+	option target 'SNAT'
+	option name 'SNAT-NTP'
+	option src_ip '192.168.2.0/24'
+	option snat_ip '<router IP>'
+	option device 'br-lan'
+
+config nat
+	option name 'SNAT-DNS'
+	list proto 'udp'
+	option dest_port '53'
+	option target 'SNAT'
+	option src 'lan'
+	option src_ip '192.168.2.0/24'
+	option snat_ip '<router IP>'
+	option device 'br-lan'
+
+config nat
+	option name 'SNAT-PING'
+	option target 'SNAT'
+	option src 'lan'
+	option src_ip '192.168.2.0/24'
+	option snat_ip '<router IP>'
+	option device 'br-lan'
+	list proto 'icmp'
+
+config rule
+	option name 'Allow-USB-OUT-SSH'
+	list proto 'tcp'
+	option dest 'usb'
+	option dest_port '22'
+	option target 'ACCEPT'
+
+config rule
+	option name 'Allow-USB-OUT-NTP'
+	list proto 'udp'
+	option dest 'usb'
+	option dest_port '123'
+	option target 'ACCEPT'
+
+config rule
+	option name 'Alow-USB-OUT-PING'
+	list proto 'icmp'
+	option dest 'usb'
+	option target 'ACCEPT'
+
+config rule
+	option name 'Allow-USB-PING'
+	list proto 'icmp'
+	option target 'ACCEPT'
+	option src 'usb'
+
+config rule
+	option name 'Allow-USB-DNS'
+	list proto 'udp'
+	option dest_port '53'
+	option target 'ACCEPT'
+	option src 'usb'
+
+config rule
+	option name 'Allow-USB-OUT-DNS'
+	list proto 'udp'
+	option dest_port '53'
+	option target 'ACCEPT'
+	option src 'usb'
+
+config forwarding
+	option src 'usb'
+	option dest 'lan'
+
+config rule
+	option name 'Aloow-LAN-OUT-ping'
+	option family 'ipv6'
+	list proto 'icmp'
+	list icmp_type 'echo-request'
+	option target 'ACCEPT'
+	option dest 'lan'
+````
+
 ### uci output
 ```
 firewall.@zone[2]=zone
@@ -154,6 +409,7 @@ network.usb.ipaddr='192.168.2.1'
 system.@system[0].zonename='<Zone Name>'
 system.@system[0].timezone='<Time Zone>'
 ```
+
 ### Edit config file: settings.json
 ```
     "station": {
@@ -202,6 +458,10 @@ system.@system[0].timezone='<Time Zone>'
   - weather
   - moon phases
   
+  Edit config file: settings.json
+  ```
+  "graph": "True"  
+  ```
   <img src="/sample_screenshots/KindleStation_graph3.png" height="360" alt="Kindle 3 Screenshot" />
  ### Test
 ```
@@ -275,7 +535,7 @@ Edit crontab and restart cron
 # nano /etc/crontab/root
 
 2 * * * * sh -c "/mnt/us/kindle-weather/weather-script.sh"
-0 * * * * sh -c "/usr/bin/ntpdate 0.jp.pool.ntp.org"
+58 * * * * sh -c "/usr/bin/ntpdate 0.jp.pool.ntp.org"
 
 # /etc/init.d/cron stop
 # kill $(pidof crond)
