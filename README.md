@@ -482,7 +482,7 @@ system.@system[0].timezone='<Time Zone>'
 ### settings.json
 | Name | Required | Type | Comment | Example |
 | ---- | ---- | ---- | ---- | ---- |
-| city | Any | string | City name | Tokorozawa |
+| city | Any | string | city name | Tokorozawa |
 | timezone | Yes | string | local timezone in linux os formatting | Asia/Tokyo |
 | encoding | Yes | string | text encoding | iso-8859-1 |
 | locale | Yes | string | system locale |en_US.UTF-8 |
