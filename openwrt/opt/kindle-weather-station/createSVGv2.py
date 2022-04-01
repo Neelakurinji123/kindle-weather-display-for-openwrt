@@ -798,6 +798,9 @@ class DrawGraph:
             elif basis == "day" and name == "moon phase":
                 daily = p.daily_forecast(n)
                 jour = str.lower(datetime.fromtimestamp(daily[0], tz).strftime('%a'))
+                day = int(datetime.fromtimestamp(daily[0], tz).strftime('%-d'))
+                mon = int(datetime.fromtimestamp(daily[0], tz).strftime('%-m'))
+                yrs = int(datetime.fromtimestamp(daily[0], tz).strftime('%Y'))
                 lat = float(p.lat)
                 _x = x + 25 + int((w - 50)  / (end - start - 1)) * n
                 _y = y - 45
@@ -812,7 +815,6 @@ class DrawGraph:
                 pi = math.pi
                 rad = daily[20] * pi * 2  # One call API: 0,1=new moon, 0.25=1st qurater moon, 0.5=full moon, 0.75=lst quarter moon 
                 c = 0.025
-                #m = rad * c * math.sin(rad)
                 m = rad * c * math.cos(rad)
                 rx = _x - 3
                 ry = _y - 53
@@ -832,18 +834,36 @@ class DrawGraph:
                     elif (2 * pi / 60) > abs(rad - pi * 1.5) >= 0:
                         res = '3'
                     else:
-                        res = ""
+                        res = str()
+
+                    return res
+
+                def ramadhan(day, mon, yrs):
+                    ra = Gregorian(yrs, mon, day).to_hijri()
+                    if ra.month_name() == "Ramadhan":
+                        res = "r"
+                    else:
+                        res = str()
 
                     return res
 
                 if lat >= 0:
-                    if rad < pi * 0.5:
+                    if phase(rad) == "n":
+                        px1 = math.cos(pi * 0.5) * rp + rx
+                        py1 = math.sin(pi * 0.5) * rp + ry
+                        px2 = math.cos(pi * 0.5) * rp + rx
+                        py2 = -math.sin(pi * 0.5) * rp + ry
+                        d = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 1 {} {}z".format(px1, py1, ra1, ra1, px2, py2, ra2, ra3, px1, py1)
+                        ps = phase(rad)
+                        ra = ramadhan(day, mon, yrs) if p.ramadhan == True else str()
+                    elif rad < pi * 0.5:
                         px1 = math.cos(pi * 0.5 - m) * rp + rx
                         py1 = math.sin(pi * 0.5 - m) * rp + ry
                         px2 = math.cos(pi * 0.5 - m) * rp + rx
                         py2 = -math.sin(pi * 0.5 - m) * rp + ry
-                        d = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 1 {} {}z".format(px1, py1, ra1, ra1, px2, py2, ra2, ra3, px1, py1)
+                        d = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 1 {} {}z".format(px1, py1, ra1, ra1, px2, py2, ra2, ra3+1, px1, py1)
                         ps = phase(rad)
+                        ra = ramadhan(day, mon, yrs) if p.ramadhan == True else str()
                     elif pi > rad >= pi * 0.5:
                         px1 = math.cos(pi * 0.5 + m) * rp + rx
                         py1 = math.sin(pi * 0.5 + m) * rp + ry
@@ -851,6 +871,7 @@ class DrawGraph:
                         py2 = -math.sin(pi * 0.5 + m) * rp + ry
                         d = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 0 {} {}z".format(px1, py1, ra1, ra1, px2, py2, ra2, ra3, px1, py1)
                         ps = phase(rad)
+                        ra = ramadhan(day, mon, yrs) if p.ramadhan == True else str()
                     elif pi * 1.5 > rad >= pi:
                         px1 = math.cos(pi * 1.5 + m) * rp + rx
                         py1 = math.sin(pi * 1.5 + m) * rp + ry
@@ -858,21 +879,32 @@ class DrawGraph:
                         py2 = -math.sin(pi * 1.5 + m) * rp + ry
                         d = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 0 {} {}z".format(px1, py1, ra1, ra1, px2, py2, ra2, ra3, px1, py1)
                         ps = phase(rad)
+                        ra = ramadhan(day, mon, yrs) if p.ramadhan == True else str()
                     else:
                         px1 = math.cos(pi * 1.5 - m) * rp + rx
                         py1 = math.sin(pi * 1.5 - m) * rp + ry
                         px2 = math.cos(pi * 1.5 - m) * rp + rx
                         py2 = -math.sin(pi * 1.5 - m) * rp + ry
+                        d = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 1 {} {}z".format(px1, py1, ra1, ra1, px2, py2, ra2, ra3+1.75, px1, py1)
+                        ps = phase(rad)
+                        ra = ramadhan(day, mon, yrs) if p.ramadhan == True else str()
+                else:
+                    if phase(rad) == "n":
+                        px1 = math.cos(pi * 0.5) * rp + rx
+                        py1 = math.sin(pi * 0.5) * rp + ry
+                        px2 = math.cos(pi * 0.5) * rp + rx
+                        py2 = -math.sin(pi * 0.5) * rp + ry
                         d = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 1 {} {}z".format(px1, py1, ra1, ra1, px2, py2, ra2, ra3, px1, py1)
                         ps = phase(rad)
-                else:
-                    if rad < pi * 0.5:
+                        ra = ramadhan(day, mon, yrs) if p.ramadhan == True else str()
+                    elif rad < pi * 0.5:
                         px1 = math.cos(pi * 1.5 - m) * rp + rx
                         py1 = math.sin(pi * 1.5 - m) * rp + ry
                         px2 = math.cos(pi * 1.5 - m) * rp + rx
                         py2 = -math.sin(pi * 1.5 - m) * rp +ry
-                        d = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 1 {} {}z".format(px1, py1, ra1, ra1, px2, py2, ra2, ra3, px1, py1)
+                        d = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 1 {} {}z".format(px1, py1, ra1, ra1, px2, py2, ra2, ra3+1, px1, py1)
                         ps = phase(rad)
+                        ra = ramadhan(day, mon, yrs) if p.ramadhan == True else str()
                     elif pi > rad >= pi * 0.5:
                         px1 = math.cos(pi * 1.5 + m) * rp + rx
                         py1 = math.sin(pi * 1.5 + m) * rp + ry
@@ -880,6 +912,7 @@ class DrawGraph:
                         py2 = -math.sin(pi * 1.5 + m) * rp + ry
                         d = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 0 {} {}z".format(px1, py1, ra1, ra1, px2, py2, ra2, ra3, px1, py1)
                         ps = phase(rad)
+                        ra = ramadhan(day, mon, yrs) if p.ramadhan == True else str()
                     elif pi * 1.5 > rad >= pi:
                         px1 = math.cos(pi * 0.5 + m) * rp + rx
                         py1 = math.sin(pi * 0.5 + m) * rp + ry
@@ -887,34 +920,38 @@ class DrawGraph:
                         py2 = -math.sin(pi * 0.5 + m) * rp + ry
                         d = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 0 {} {}z".format(px1, py1, ra1, ra1, px2, py2, ra2, ra3, px1, py1)
                         ps = phase(rad)
+                        ra = ramadhan(day, mon, yrs) if p.ramadhan == True else str()
                     else:
                         px1 = math.cos(pi * 0.5 - m) * rp + rx
                         py1 = math.sin(pi * 0.5 - m) * rp + ry
                         px2 = math.cos(pi * 0.5 - m) * rp + rx
                         py2 = -math.sin(pi * 0.5 - m) * rp + ry
-                        d = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 1 {} {}z".format(px1, py1, ra1, ra1, px2, py2, ra2, ra3, px1, py1)
+                        d = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 1 {} {}z".format(px1, py1, ra1, ra1, px2, py2, ra2, ra3+1.75, px1, py1)
                         ps = phase(rad)
+                        ra = ramadhan(day, mon, yrs) if p.ramadhan == True else str()
 
                 icons += SVGpath(d, style).svg() if ps != 'f' else ''
 
-                # moon rise and moon set
+                # moon rise time and moon set time
                 #t_moonrise = str(daily[20])  # test
-                #t_moonrise = str(datetime.fromtimestamp(daily[18], tz).strftime("%H:%M"))
-                #t_moonset = str(datetime.fromtimestamp(daily[19], tz).strftime("%H:%M"))
-                #print(tz, t_moonrise, t_moonset, daily[18]) # test
                 t_moonrise = "00:00" if daily[18] == 0 else str(datetime.fromtimestamp(daily[18], tz).strftime("%H:%M"))
                 t_moonset = "00:00" if daily[19] == 0 else str(datetime.fromtimestamp(daily[19], tz).strftime("%H:%M"))
 
                 svg += SVGtext("start", "16px", (_x - 32), (_y - 10), "r:").svg()
-                svg += SVGtext("end", "16px", (_x + 26), (_y - 10), "{}".format(t_moonrise)).svg()
+                svg += SVGtext("end", "16px", (_x + 24), (_y - 10), "{}".format(t_moonrise)).svg()
                 svg += SVGtext("start", "16px", (_x - 32), (_y + 7), "s:").svg()
                 svg += SVGtext("end", "16px", (_x + 26), (_y + 7), "{}".format(t_moonset)).svg()
-                svg += SVGtext("start", "16px", (_x - 32), (_y - 68), "{}".format(ps)).svg()
 
+                # moon phase and ramadhan 
+                svg += SVGtext("start", "16px", (_x - 32), (_y - 68), "{}".format(ps)).svg()
+                svg += SVGtext("end", "16px", (_x + 25), (_y - 68), "{}".format(ra)).svg()
+
+                # grid
                 if n < (end - 1):
                     style = "fill:none;stroke:{};stroke-linecap:{};stroke-width:{}px;".format(grid_y_color, stroke_linecap, grid_y)
                     icons += SVGline((_x + 30), (_x + 30), (_y - h + 55), (_y + 10), style).svg()
 
+                # label
                 if label == True and label_adjust == True:
                     svg += SVGtext("middle", "16px", _x, (y - 9), "{}".format(jour)).svg()
                 elif label == True and label_adjust == False:
@@ -1320,6 +1357,9 @@ if __name__ == "__main__":
         mode = 'lightmode'
     else:
         mode = 'lightmode'
+
+    if p.ramadhan == True:
+        from hijri_converter import Hijri, Gregorian
 
     # locale setting
     #locale.setlocale(locale.LC_TIME, p.t_locale)

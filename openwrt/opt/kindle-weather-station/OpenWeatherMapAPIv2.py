@@ -41,6 +41,7 @@ class OpenWeatherMap:
             self.lang = service['lang']
             self.exclude = service['exclude']  
             self.alerts = bool(eval(service['alerts']))
+            self.ramadhan = bool(eval(service['ramadhan'])) if 'ramadhan' in service else False
             self.cloudconvert = bool(eval(service['cloudconvert']))
             self.converter = service['converter']
             self.graph = bool(eval(service['graph'])) if 'graph' in service else None
