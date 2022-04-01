@@ -493,7 +493,7 @@ system.@system[0].timezone='<Time Zone>'
 | api_key | Yes | hex | OpenWeatherMap API key | 1234567890abcdef1234567890abcdef |
 | lat | Yes | float | latitude | 35.4761 |
 | lon | Yes | float | longitude | 139.2810 |
-| units | Yes | string | unit[^2] | metric |
+| units | Yes | string | unit system[^2] | metric |
 | lang | Yes | string | language for OpenWeatherMap | en |
 | exclude | No | string | exclude from API call | minutely |
 | alerts | No | boolean | weather alerts | True |
