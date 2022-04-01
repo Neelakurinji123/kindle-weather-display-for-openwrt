@@ -463,6 +463,22 @@ system.@system[0].timezone='<Time Zone>'
   "graph": "True"  
   ```
   <img src="/sample_screenshots/KindleStation_graph3.png" height="360" alt="Kindle 3 Screenshot" />
+  
+ ####  moon phases: Ramadhan option 
+ Install hijri-converter module via pip
+ ```
+ pip install hijri-converter
+ ```
+ Edit settings.json
+ ```
+ {
+    "station": {
+        ...
+        "ramadhan": "True",
+        ...
+    }
+}    
+```
  ### Test
 ```
 # ./kindle-weather.sh settings_Mcmurdo-Station.json
