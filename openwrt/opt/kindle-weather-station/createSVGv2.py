@@ -849,10 +849,10 @@ class DrawGraph:
 
                 if lat >= 0:
                     if phase(rad) == "n":
-                        px1 = math.cos(pi * 0.5) * rp + rx
-                        py1 = math.sin(pi * 0.5) * rp + ry
-                        px2 = math.cos(pi * 0.5) * rp + rx
-                        py2 = -math.sin(pi * 0.5) * rp + ry
+                        px1 = math.cos(pi * 0.5 - m) * rp + rx
+                        py1 = math.sin(pi * 0.5 - m ) * rp + ry
+                        px2 = math.cos(pi * 0.5 - m) * rp + rx
+                        py2 = -math.sin(pi * 0.5 - m) * rp + ry
                         d = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 1 {} {}z".format(px1, py1, ra1, ra1, px2, py2, ra2, ra3, px1, py1)
                         ps = phase(rad)
                         ra = ramadhan(day, mon, yrs) if p.ramadhan == True else str()
@@ -890,10 +890,10 @@ class DrawGraph:
                         ra = ramadhan(day, mon, yrs) if p.ramadhan == True else str()
                 else:
                     if phase(rad) == "n":
-                        px1 = math.cos(pi * 0.5) * rp + rx
-                        py1 = math.sin(pi * 0.5) * rp + ry
-                        px2 = math.cos(pi * 0.5) * rp + rx
-                        py2 = -math.sin(pi * 0.5) * rp + ry
+                        px1 = math.cos(pi * 0.5 + m) * rp + rx
+                        py1 = math.sin(pi * 0.5 + m) * rp + ry
+                        px2 = math.cos(pi * 0.5 + m) * rp + rx
+                        py2 = -math.sin(pi * 0.5 + m) * rp + ry
                         d = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 1 {} {}z".format(px1, py1, ra1, ra1, px2, py2, ra2, ra3, px1, py1)
                         ps = phase(rad)
                         ra = ramadhan(day, mon, yrs) if p.ramadhan == True else str()
