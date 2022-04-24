@@ -825,7 +825,7 @@ class DrawGraph:
                 ra3 = 1 * rp
 
                 def phase(rad):
-                    if (2 * pi / 60) > rad >= 0 or (2 * pi / 30) > (pi * 2 - rad) >= 0:
+                    if (2 * pi / 60) > rad >= 0 or (2 * pi / 60) > (pi * 2 - rad) >= 0:
                         res = 'n'
                     elif (2 * pi / 60) > abs(rad - pi * 0.5) >= 0:
                         res = '1'
