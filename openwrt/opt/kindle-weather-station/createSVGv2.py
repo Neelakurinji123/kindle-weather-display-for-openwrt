@@ -932,7 +932,7 @@ class DrawGraph:
 
                 icons += SVGpath(d, style).svg() if ps != 'f' else ''
 
-                # moon rise time and moon set time
+                # moonrise and moonset time
                 #t_moonrise = str(daily[20])  # test
                 t_moonrise = "00:00" if daily[18] == 0 else str(datetime.fromtimestamp(daily[18], tz).strftime("%H:%M"))
                 t_moonset = "00:00" if daily[19] == 0 else str(datetime.fromtimestamp(daily[19], tz).strftime("%H:%M"))
@@ -1371,4 +1371,9 @@ if __name__ == "__main__":
         create_svg(p=p, t_now=t_now, tz=tz, utc=utc, svgfile=svgfile, pngfile=pngfile)
 
     t.sleep(1)
-    img_processing(p=p, svgfile=svgfile, pngfile=pngfile, pngtmpfile=pngtmpfile, mode=mode)
+    try:
+        img_processing(p=p, svgfile=svgfile, pngfile=pngfile, pngtmpfile=pngtmpfile, mode=mode)
+    except Exception as e:
+        shutil.copyfile(error_image, flatten_pngfile)
+        print(e)
+        exit(1)
