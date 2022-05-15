@@ -370,7 +370,7 @@ class HourlyWeather:
             d = read_i18n(p)
             if not d == dict():
                 for k in hrs.keys():
-                    hrs[k] = d["hours"][hours[k]]
+                    hrs[k] = d["hours"][hrs[k]]
 
             svg_text += SVGtext("start", "25px", (x - 0), (y + 165), hrs[i]).svg()
             svg_text += temp_unit(x=(x + 30), y=(y + 96), text=round(hourly[5]), unit=p.unit['temp'])
@@ -559,6 +559,7 @@ class DrawGraph:
         step = self.object["step"]
         basis = self.object["basis"]
         svg = '<g font-family="{}">\n'.format(p.font)
+        d = read_i18n(p)
 
         # Canvas
         style = "fill:{};stroke:{};stroke-width:{}px;".format(bgcolor, bgcolor, (0))
@@ -599,6 +600,7 @@ class DrawGraph:
             elif basis == "day":
                 daily = p.daily_forecast(n)
                 jour = str.lower(datetime.fromtimestamp(daily[0], tz).strftime('%a'))
+                jour = d["abbreviated_weekday"][jour] if not d == dict() else jour
                 _x = x + 25 + int((w - 50)  / (end - start - 1)) * n
                 _y = y - (daily[5] - t_min) * t_step - 45
                 points += "{},{} ".format(_x, _y)
@@ -646,6 +648,7 @@ class DrawGraph:
         step = self.object["step"]
         basis = self.object["basis"]
         l_sum = float()
+        d = read_i18n(p)
 
         svg = '<g font-family="{}">\n'.format(p.font)
         #data = p.daily_forecast(0)
@@ -711,6 +714,7 @@ class DrawGraph:
             for n in range(start, end, step):
                 daily = p.daily_forecast(n)
                 jour = str.lower(datetime.fromtimestamp(daily[0], tz).strftime('%a'))
+                jour = d["abbreviated_weekday"][jour] if not d == dict() else jour
                 _x = x + 25 + int((w  - 50) / (end - start - 1)) * n
                 _y = y - (daily[10] - l_min) * l_step - 35
                 svg += SVGline(_x, _x, (y - 35), _y, style).svg()
@@ -758,6 +762,7 @@ class DrawGraph:
         basis = self.object["basis"]
         svg = svg = '<g font-family="{}">\n'.format(p.font)
         icons = str()
+        d = read_i18n(p)
 
         tz = timezone(p.t_timezone)
         t_now = p.t_now
@@ -775,6 +780,7 @@ class DrawGraph:
             if basis == "day" and name == "weather":
                 daily = p.daily_forecast(n)
                 jour = str.lower(datetime.fromtimestamp(daily[0], tz).strftime('%a'))
+                jour = d["abbreviated_weekday"][jour] if not d == dict() else jour
                 _x = x + 25 + int((w - 50)  / (end - start - 1)) * n
                 _y = y - 45
 
@@ -798,6 +804,7 @@ class DrawGraph:
             elif basis == "day" and name == "moon phase":
                 daily = p.daily_forecast(n)
                 jour = str.lower(datetime.fromtimestamp(daily[0], tz).strftime('%a'))
+                jour = d["abbreviated_weekday"][jour] if not d == dict() else jour
                 day = int(datetime.fromtimestamp(daily[0], tz).strftime('%-d'))
                 mon = int(datetime.fromtimestamp(daily[0], tz).strftime('%-m'))
                 yrs = int(datetime.fromtimestamp(daily[0], tz).strftime('%Y'))
@@ -853,7 +860,7 @@ class DrawGraph:
                         py1 = math.sin(pi * 0.5 - m ) * rp + ry
                         px2 = math.cos(pi * 0.5 - m) * rp + rx
                         py2 = -math.sin(pi * 0.5 - m) * rp + ry
-                        d = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 1 {} {}z".format(px1, py1, ra1, ra1, px2, py2, ra2, ra3, px1, py1)
+                        dm = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 1 {} {}z".format(px1, py1, ra1, ra1, px2, py2, ra2, ra3, px1, py1)
                         ps = phase(rad)
                         ra = ramadhan(day, mon, yrs) if p.ramadhan == True else str()
                     elif rad < pi * 0.5:
@@ -861,7 +868,7 @@ class DrawGraph:
                         py1 = math.sin(pi * 0.5 - m) * rp + ry
                         px2 = math.cos(pi * 0.5 - m) * rp + rx
                         py2 = -math.sin(pi * 0.5 - m) * rp + ry
-                        d = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 1 {} {}z".format(px1, py1, ra1, ra1, px2, py2, ra2, ra3+1, px1, py1)
+                        dm = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 1 {} {}z".format(px1, py1, ra1, ra1, px2, py2, ra2, ra3+1, px1, py1)
                         ps = phase(rad)
                         ra = ramadhan(day, mon, yrs) if p.ramadhan == True else str()
                     elif pi > rad >= pi * 0.5:
@@ -869,7 +876,7 @@ class DrawGraph:
                         py1 = math.sin(pi * 0.5 + m) * rp + ry
                         px2 = math.cos(pi * 0.5 + m) * rp + rx
                         py2 = -math.sin(pi * 0.5 + m) * rp + ry
-                        d = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 0 {} {}z".format(px1, py1, ra1, ra1, px2, py2, ra2, ra3, px1, py1)
+                        dm = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 0 {} {}z".format(px1, py1, ra1, ra1, px2, py2, ra2, ra3, px1, py1)
                         ps = phase(rad)
                         ra = ramadhan(day, mon, yrs) if p.ramadhan == True else str()
                     elif pi * 1.5 > rad >= pi:
@@ -877,7 +884,7 @@ class DrawGraph:
                         py1 = math.sin(pi * 1.5 + m) * rp + ry
                         px2 = math.cos(pi * 1.5 + m) * rp + rx
                         py2 = -math.sin(pi * 1.5 + m) * rp + ry
-                        d = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 0 {} {}z".format(px1, py1, ra1, ra1, px2, py2, ra2, ra3, px1, py1)
+                        dm = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 0 {} {}z".format(px1, py1, ra1, ra1, px2, py2, ra2, ra3, px1, py1)
                         ps = phase(rad)
                         ra = ramadhan(day, mon, yrs) if p.ramadhan == True else str()
                     else:
@@ -885,7 +892,7 @@ class DrawGraph:
                         py1 = math.sin(pi * 1.5 - m) * rp + ry
                         px2 = math.cos(pi * 1.5 - m) * rp + rx
                         py2 = -math.sin(pi * 1.5 - m) * rp + ry
-                        d = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 1 {} {}z".format(px1, py1, ra1, ra1, px2, py2, ra2, ra3+1.75, px1, py1)
+                        dm = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 1 {} {}z".format(px1, py1, ra1, ra1, px2, py2, ra2, ra3+1.75, px1, py1)
                         ps = phase(rad)
                         ra = ramadhan(day, mon, yrs) if p.ramadhan == True else str()
                 else:
@@ -894,7 +901,7 @@ class DrawGraph:
                         py1 = math.sin(pi * 0.5 + m) * rp + ry
                         px2 = math.cos(pi * 0.5 + m) * rp + rx
                         py2 = -math.sin(pi * 0.5 + m) * rp + ry
-                        d = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 1 {} {}z".format(px1, py1, ra1, ra1, px2, py2, ra2, ra3, px1, py1)
+                        dm = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 1 {} {}z".format(px1, py1, ra1, ra1, px2, py2, ra2, ra3, px1, py1)
                         ps = phase(rad)
                         ra = ramadhan(day, mon, yrs) if p.ramadhan == True else str()
                     elif rad < pi * 0.5:
@@ -902,7 +909,7 @@ class DrawGraph:
                         py1 = math.sin(pi * 1.5 - m) * rp + ry
                         px2 = math.cos(pi * 1.5 - m) * rp + rx
                         py2 = -math.sin(pi * 1.5 - m) * rp +ry
-                        d = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 1 {} {}z".format(px1, py1, ra1, ra1, px2, py2, ra2, ra3+1, px1, py1)
+                        dm = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 1 {} {}z".format(px1, py1, ra1, ra1, px2, py2, ra2, ra3+1, px1, py1)
                         ps = phase(rad)
                         ra = ramadhan(day, mon, yrs) if p.ramadhan == True else str()
                     elif pi > rad >= pi * 0.5:
@@ -910,7 +917,7 @@ class DrawGraph:
                         py1 = math.sin(pi * 1.5 + m) * rp + ry
                         px2 = math.cos(pi * 1.5 + m) * rp + rx
                         py2 = -math.sin(pi * 1.5 + m) * rp + ry
-                        d = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 0 {} {}z".format(px1, py1, ra1, ra1, px2, py2, ra2, ra3, px1, py1)
+                        dm = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 0 {} {}z".format(px1, py1, ra1, ra1, px2, py2, ra2, ra3, px1, py1)
                         ps = phase(rad)
                         ra = ramadhan(day, mon, yrs) if p.ramadhan == True else str()
                     elif pi * 1.5 > rad >= pi:
@@ -918,7 +925,7 @@ class DrawGraph:
                         py1 = math.sin(pi * 0.5 + m) * rp + ry
                         px2 = math.cos(pi * 0.5 + m) * rp + rx
                         py2 = -math.sin(pi * 0.5 + m) * rp + ry
-                        d = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 0 {} {}z".format(px1, py1, ra1, ra1, px2, py2, ra2, ra3, px1, py1)
+                        dm = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 0 {} {}z".format(px1, py1, ra1, ra1, px2, py2, ra2, ra3, px1, py1)
                         ps = phase(rad)
                         ra = ramadhan(day, mon, yrs) if p.ramadhan == True else str()
                     else:
@@ -926,11 +933,11 @@ class DrawGraph:
                         py1 = math.sin(pi * 0.5 - m) * rp + ry
                         px2 = math.cos(pi * 0.5 - m) * rp + rx
                         py2 = -math.sin(pi * 0.5 - m) * rp + ry
-                        d = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 1 {} {}z".format(px1, py1, ra1, ra1, px2, py2, ra2, ra3+1.75, px1, py1)
+                        dm = "M{} {} A{} {} 0 1 1 {} {} {} {} 0 0 1 {} {}z".format(px1, py1, ra1, ra1, px2, py2, ra2, ra3+1.75, px1, py1)
                         ps = phase(rad)
                         ra = ramadhan(day, mon, yrs) if p.ramadhan == True else str()
 
-                icons += SVGpath(d, style).svg() if ps != 'f' else ''
+                icons += SVGpath(dm, style).svg() if ps != 'f' else ''
 
                 # moonrise and moonset time
                 #t_moonrise = str(daily[20])  # test
